@@ -1,0 +1,15 @@
+// 解析URL参数
+const params = new URLSearchParams(window.location.search);
+const code = params.get('code');
+
+// 通过postMessage发送给父页面
+if (window.opener) {
+    window.opener.postMessage({
+        code: code,
+        state: params.get('state')
+    }, '*');
+    
+    // 显示友好信息并自动关闭
+    document.body.innerHTML = '<h3>授权成功，请返回应用</h3>';
+    setTimeout(() => window.close(), 2000);
+}
