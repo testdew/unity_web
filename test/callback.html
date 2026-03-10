@@ -272,7 +272,7 @@
                         const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
                         
                         const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
-                            method: 'GET',
+                            method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Accept': 'application/json'
