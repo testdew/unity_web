@@ -271,7 +271,9 @@
                        // const controller = new AbortController();
                        // const  = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
 					   
-					   const notifyUrl = new URL(CONFIG.LOCAL_SERVER_URL);
+					   
+					   /*
+					    const notifyUrl = new URL(CONFIG.LOCAL_SERVER_URL);
                         
                         // 添加所有参数到URL
                         notifyUrl.searchParams.append('type', 'OAUTH_CALLBACK');
@@ -296,7 +298,19 @@
                             signal: controller.signal,
                             mode: 'no-cors' // 允许跨域请求
                         });
+                        */
+					   
                         
+                        const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(notifyData),
+                          //  signal: controller.signal,
+                            mode: 'no-cors' // 允许跨域请求
+                        });
                         
                       //  clearTimeout(timeoutId);
                         
