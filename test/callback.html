@@ -268,8 +268,8 @@
                 // 方法2: 通过fetch通知本地服务器
                 if (CONFIG.USE_FETCH) {
                     try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
+                       // const controller = new AbortController();
+                       // const  = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
                         
                         const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
                             method: 'POST',
@@ -278,11 +278,11 @@
                                 'Accept': 'application/json'
                             },
                             body: JSON.stringify(notifyData),
-                            signal: controller.signal,
+                          //  signal: controller.signal,
                             mode: 'no-cors' // 允许跨域请求
                         });
                         
-                        clearTimeout(timeoutId);
+                      //  clearTimeout(timeoutId);
                         
                         console.log('✅ 本地服务器通知已发送');
                         serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
