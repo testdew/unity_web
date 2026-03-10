@@ -1,31 +1,484 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth 授权回调 - 处理中</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #f0f5fa 0%, #e6ecf3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 20, 40, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8);
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .card.success {
+            border-top: 4px solid #4CAF50;
+        }
+        
+        .card.error {
+            border-top: 4px solid #f44336;
+        }
+        
+        .icon {
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1a2a3a;
+            margin-bottom: 0.75rem;
+        }
+        
+        p {
+            color: #4a627a;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .status-message {
+            background: #f5f9ff;
+            border-radius: 40px;
+            padding: 0.8rem 1.2rem;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            color: #1e3b4f;
+            border: 1px solid #cde1f5;
+            word-break: break-all;
+            text-align: left;
+        }
+        
+        .params-list {
+            background: #f5f7fa;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: left;
+            font-size: 0.85rem;
+            border: 1px solid #d9e4f0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .params-list dt {
+            font-weight: 600;
+            color: #2d4b6e;
+            margin-top: 0.5rem;
+        }
+        
+        .params-list dd {
+            color: #1e3b4f;
+            margin-left: 1rem;
+            word-break: break-all;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e0e7f0;
+            border-top-color: #3b7cbf;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 1rem auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .button {
+            background: #1e3b4f;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+        
+        .button:hover {
+            background: #2d4f6a;
+        }
+        
+        .button.secondary {
+            background: #e0e7f0;
+            color: #1e3b4f;
+        }
+        
+        .button.secondary:hover {
+            background: #d0dbea;
+        }
+        
+        .flex-row {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        
+        .badge {
+            background: #e7edf6;
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            color: #2266a8;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .timestamp {
+            color: #6d8fb0;
+            font-size: 0.75rem;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
-<script>
+    <div class="card" id="callbackCard">
+        <div class="icon" id="statusIcon">⏳</div>
+        <h1 id="statusTitle">正在处理授权...</h1>
+        <p id="statusDescription">请稍候，正在将登录信息传回应用</p>
+        
+        <div class="loader" id="loadingSpinner"></div>
+        
+        <div class="status-message hidden" id="serverStatus">
+            <strong id="serverStatusText"></strong>
+        </div>
+        
+        <div class="params-list" id="paramsDisplay">
+            <strong>收到参数：</strong>
+            <div id="paramContent"></div>
+        </div>
+        
+        <div class="flex-row">
+            <button class="button" id="closeBtn" onclick="closeWindow()">关闭窗口</button>
+            <button class="button secondary hidden" id="retryBtn" onclick="retryNotify()">重试通知</button>
+        </div>
+        
+        <div class="timestamp" id="timestamp"></div>
+        <div class="badge" id="methodBadge">通过 postMessage + HTTP 通知</div>
+    </div>
 
-window.addEventListener('load', function() {
-    const params = {};
-    const url = new URL(window.location.href);
-    url.searchParams.forEach((value, key) => {
-        params[key] = value;
-    });
-    
-    // 发送消息给打开它的父窗口
-    if (window.opener) {
-        window.opener.postMessage({
-            type: 'OAUTH_CALLBACK',
-            params: params,
-            url: window.location.href
-        }, '*'); // 生产环境建议替换为具体的父页面源
-		
-		  // 显示友好信息并自动关闭
-		document.body.innerHTML = '<h3>授权成功，请返回应用</h3>';
-		setTimeout(() => window.close(), 2000);
-    }
-});
+    <script>
+        // 配置
+        const CONFIG = {
+            LOCAL_SERVER_URL: 'http://localhost:5000/callback',
+            NOTIFY_TIMEOUT: 5000, // 5秒超时
+            AUTO_CLOSE_DELAY: 3000, // 3秒后自动关闭
+            USE_FETCH: true // 是否使用fetch通知本地服务器
+        };
 
-</script>
+        // 解析URL参数
+        const params = {};
+        const url = new URL(window.location.href);
+        url.searchParams.forEach((value, key) => {
+            params[key] = value;
+        });
+
+        // 记录开始时间
+        const startTime = new Date();
+        document.getElementById('timestamp').textContent = `处理时间: ${startTime.toLocaleTimeString()}`;
+
+        // 显示参数
+        displayParams(params);
+
+        // 判断是否成功
+        const isSuccess = params.code && !params.error;
+        const isError = params.error || false;
+
+        // 更新UI状态
+        updateUIByStatus(isSuccess, isError, params);
+
+        // 发送通知到本地服务器
+        notifyLocalServer(params);
+
+        // ==================== 核心功能 ====================
+
+        /**
+         * 发送通知到本地服务器 (http://localhost:5000)
+         */
+        async function notifyLocalServer(params) {
+            const serverStatusEl = document.getElementById('serverStatus');
+            const serverStatusText = document.getElementById('serverStatusText');
+            
+            // 显示发送状态
+            serverStatusEl.classList.remove('hidden');
+            serverStatusText.innerHTML = '⏳ 正在通知本地服务器...';
+            
+            try {
+                // 构建要发送的数据
+                const notifyData = {
+                    type: 'OAUTH_CALLBACK',
+                    params: params,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    source: 'oauth_callback_page'
+                };
+                
+                // 方法1: 通过postMessage通知父窗口（如果是通过window.open打开的）
+                if (window.opener && !window.opener.closed) {
+                    try {
+                        window.opener.postMessage({
+                            type: 'OAUTH_CALLBACK',
+                            params: params,
+                            url: window.location.href
+                        }, '*'); // 生产环境建议替换为具体的源
+                        
+                        console.log('✅ postMessage已发送到父窗口');
+                        serverStatusText.innerHTML = '✅ 已通过postMessage通知父窗口<br>';
+                    } catch (e) {
+                        console.error('postMessage发送失败:', e);
+                        serverStatusText.innerHTML += '❌ postMessage发送失败<br>';
+                    }
+                }
+                
+                // 方法2: 通过fetch通知本地服务器
+                if (CONFIG.USE_FETCH) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
+                        
+                        const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(notifyData),
+                            signal: controller.signal,
+                            mode: 'no-cors' // 允许跨域请求
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        console.log('✅ 本地服务器通知已发送');
+                        serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
+                        
+                        // 如果成功，自动关闭
+                        if (isSuccess) {
+                            startAutoClose();
+                        }
+                    } catch (error) {
+                        console.error('❌ 通知本地服务器失败:', error);
+                        serverStatusText.innerHTML += '❌ 通知本地服务器失败: ' + error.message;
+                        
+                        // 显示重试按钮
+                        document.getElementById('retryBtn').classList.remove('hidden');
+                    }
+                }
+                
+                // 方法3: 使用图片Ping方式（备选方案，适用于不支持fetch的旧浏览器）
+                if (!CONFIG.USE_FETCH) {
+                    sendBeaconNotification(params);
+                }
+                
+            } catch (e) {
+                console.error('通知过程出错:', e);
+                serverStatusText.innerHTML = '❌ 通知过程出错: ' + e.message;
+                document.getElementById('retryBtn').classList.remove('hidden');
+            }
+        }
+
+        /**
+         * 使用sendBeacon发送通知（更可靠，即使页面关闭也会发送）
+         */
+        function sendBeaconNotification(params) {
+            const data = JSON.stringify({
+                type: 'OAUTH_CALLBACK',
+                params: params,
+                url: window.location.href
+            });
+            
+            const blob = new Blob([data], { type: 'application/json' });
+            const sent = navigator.sendBeacon(CONFIG.LOCAL_SERVER_URL, blob);
+            
+            if (sent) {
+                console.log('✅ sendBeacon发送成功');
+                document.getElementById('serverStatusText').innerHTML += '✅ sendBeacon发送成功';
+            } else {
+                console.warn('⚠️ sendBeacon发送失败');
+                document.getElementById('serverStatusText').innerHTML += '⚠️ sendBeacon发送失败';
+            }
+        }
+
+        /**
+         * 显示URL参数
+         */
+        function displayParams(params) {
+            const paramContent = document.getElementById('paramContent');
+            let html = '<dl>';
+            
+            if (Object.keys(params).length === 0) {
+                html += '<p>无参数</p>';
+            } else {
+                for (let [key, value] of Object.entries(params)) {
+                    // 隐藏敏感信息
+                    let displayValue = value;
+                    if (key === 'code' && value.length > 20) {
+                        displayValue = value.substring(0, 20) + '...';
+                    }
+                    html += `<dt>${key}</dt><dd>${displayValue}</dd>`;
+                }
+            }
+            
+            html += '</dl>';
+            paramContent.innerHTML = html;
+        }
+
+        /**
+         * 根据状态更新UI
+         */
+        function updateUIByStatus(success, error, params) {
+            const card = document.getElementById('callbackCard');
+            const icon = document.getElementById('statusIcon');
+            const title = document.getElementById('statusTitle');
+            const desc = document.getElementById('statusDescription');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            if (success) {
+                card.classList.add('success');
+                icon.textContent = '✅';
+                title.textContent = '授权成功！';
+                desc.textContent = '正在将登录信息传回应用...';
+                
+                // 如果提供商信息可以从params中获取
+                if (params.provider) {
+                    desc.textContent = `正在将 ${params.provider} 登录信息传回应用...`;
+                }
+            } else if (error) {
+                card.classList.add('error');
+                icon.textContent = '❌';
+                title.textContent = '授权失败';
+                desc.textContent = params.error_description || params.error || '用户取消了授权';
+                spinner.classList.add('hidden');
+                
+                // 错误时也尝试通知
+                document.getElementById('methodBadge').textContent = '错误状态 - 仍尝试通知';
+            }
+        }
+
+        /**
+         * 开始自动关闭倒计时
+         */
+        function startAutoClose() {
+            const desc = document.getElementById('statusDescription');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            spinner.classList.add('hidden');
+            desc.textContent = `登录成功！窗口将在 ${CONFIG.AUTO_CLOSE_DELAY/1000} 秒后自动关闭`;
+            
+            let countdown = CONFIG.AUTO_CLOSE_DELAY / 1000;
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    desc.textContent = `登录成功！窗口将在 ${countdown} 秒后自动关闭`;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+            
+            setTimeout(() => {
+                window.close();
+            }, CONFIG.AUTO_CLOSE_DELAY);
+        }
+
+        /**
+         * 手动关闭窗口
+         */
+        function closeWindow() {
+            window.close();
+        }
+
+        /**
+         * 重试通知
+         */
+        function retryNotify() {
+            document.getElementById('retryBtn').classList.add('hidden');
+            document.getElementById('serverStatusText').innerHTML = '⏳ 正在重试通知...';
+            notifyLocalServer(params);
+        }
+
+        /**
+         * 发送给父窗口的postMessage（已在notifyLocalServer中实现）
+         * 这里保留作为备选调用
+         */
+        function notifyParent() {
+            if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({
+                    type: 'OAUTH_CALLBACK',
+                    params: params,
+                    url: window.location.href
+                }, '*');
+                console.log('postMessage已发送到父窗口');
+            }
+        }
+
+        // 页面加载时执行
+        window.addEventListener('load', function() {
+            console.log('回调页面加载完成', params);
+            
+            // 如果已经有code，尝试立即通知
+            if (params.code) {
+                console.log('检测到授权码，正在通知应用...');
+            }
+        });
+
+        // 监听来自父窗口的消息（用于双向通信）
+        window.addEventListener('message', function(event) {
+            console.log('收到父窗口消息:', event.data);
+            
+            if (event.data && event.data.type === 'PING') {
+                // 父窗口确认存活
+                event.source.postMessage({
+                    type: 'PONG',
+                    params: params
+                }, event.origin);
+            }
+        });
+
+        // 如果父窗口支持，可以尝试立即ping通
+        setTimeout(() => {
+            if (window.opener && !window.opener.closed) {
+                try {
+                    window.opener.postMessage({ type: 'PING' }, '*');
+                } catch (e) {
+                    // 忽略跨域错误
+                }
+            }
+        }, 100);
+    </script>
 </body>
 </html>
