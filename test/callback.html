@@ -271,7 +271,7 @@
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
                         
-                        const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
+                       /* const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -280,7 +280,34 @@
                             body: JSON.stringify(notifyData),
                             signal: controller.signal,
                             mode: 'no-cors' // 允许跨域请求
+                        });*/
+						
+						 const notifyUrl = new URL(CONFIG.LOCAL_SERVER_URL);
+                        
+                        // 添加所有参数到URL
+                        notifyUrl.searchParams.append('type', 'OAUTH_CALLBACK');
+                        notifyUrl.searchParams.append('timestamp', Date.now().toString());
+                        
+                        // 添加OAuth参数
+                        for (let [key, value] of Object.entries(params)) {
+                            notifyUrl.searchParams.append(key, value);
+                        }
+                        
+                        console.log('GET请求URL:', notifyUrl.toString());
+                        
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
+                        
+                        // 使用GET请求，没有body
+                        const response = await fetch(notifyUrl.toString(), {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            signal: controller.signal,
+                            mode: 'no-cors' // 允许跨域请求
                         });
+						
                         
                         clearTimeout(timeoutId);
                         
