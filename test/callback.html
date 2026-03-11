@@ -220,7 +220,7 @@
 		params['timestamp'] = new Date().toISOString();
 				
         // 判断是否成功
-        const isSuccess = params.code && !params.error;
+        var isSuccess = params.code && !params.error;
         const isError = params.error || false;
 
         // 更新UI状态
@@ -313,7 +313,6 @@
 							console.log('✅ 请求成功，状态码:', response.status);
 							console.log('✅ 本地服务器通知已发送');
 							serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
-							isSuccess = true;
 							
 						}
 						else{
@@ -322,7 +321,7 @@
 						}
                         
                         // 如果成功，自动关闭
-                        if (isSuccess)
+                       // if (isSuccess)
 						{
                             startAutoClose();
                         }
