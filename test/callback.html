@@ -169,8 +169,8 @@
 <body>
     <div class="card" id="callbackCard">
         <div class="icon" id="statusIcon">⏳</div>
-        <h1 id="statusTitle">正在处理授权...</h1>
-        <p id="statusDescription">请稍候，正在将登录信息传回应用</p>
+        <h1 id="statusTitle">正在处理...</h1>
+        <p id="statusDescription">请稍候，正在将信息传回应用</p>
         
         <div class="loader" id="loadingSpinner"></div>
         
@@ -308,12 +308,22 @@
 						*/
                         
                       //  clearTimeout(timeoutId);
-                        
-                        console.log('✅ 本地服务器通知已发送');
-                        serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
+                        // ✅ 判断成功的几种方式
+						if (response.ok) { // 状态码在200-299之间
+							console.log('✅ 请求成功，状态码:', response.status);
+							console.log('✅ 本地服务器通知已发送');
+							serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
+							isSuccess = true;
+							
+						}
+						else{
+							console.error('❌ 请求失败，状态码:', response.status);
+							serverStatusText.innerHTML += `❌ 请求失败 (${response.status})`;
+						}
                         
                         // 如果成功，自动关闭
-                        if (isSuccess) {
+                        if (isSuccess)
+						{
                             startAutoClose();
                         }
                     } catch (error) {
@@ -341,13 +351,8 @@
          * 使用sendBeacon发送通知（更可靠，即使页面关闭也会发送）
          */
         function sendBeaconNotification(params) {
-            const data = JSON.stringify({
-                type: 'OAUTH_CALLBACK',
-                params: params,
-                url: window.location.href
-            });
-            
-            const blob = new Blob([data], { type: 'application/json' });
+
+            const blob = new Blob([params], { type: 'application/json' });
             const sent = navigator.sendBeacon(CONFIG.LOCAL_SERVER_URL, blob);
             
             if (sent) {
@@ -456,20 +461,6 @@
             notifyLocalServer(params);
         }
 
-        /**
-         * 发送给父窗口的postMessage（已在notifyLocalServer中实现）
-         * 这里保留作为备选调用
-         */
-        function notifyParent() {
-            if (window.opener && !window.opener.closed) {
-                window.opener.postMessage({
-                    type: 'OAUTH_CALLBACK',
-                    params: params,
-                    url: window.location.href
-                }, '*');
-                console.log('postMessage已发送到父窗口');
-            }
-        }
 
         // 页面加载时执行
         window.addEventListener('load', function() {
