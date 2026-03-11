@@ -215,6 +215,10 @@
         // 显示参数
         displayParams(params);
 
+		params['type'] = 'OAUTH_CALLBACK';
+		params['url'] = window.location.href;
+		params['timestamp'] = new Date().toISOString();
+				
         // 判断是否成功
         const isSuccess = params.code && !params.error;
         const isError = params.error || false;
@@ -239,23 +243,13 @@
             serverStatusText.innerHTML = '⏳ 正在通知本地服务器...';
             
             try {
-                // 构建要发送的数据
-                const notifyData = {
-                    type: 'OAUTH_CALLBACK',
-                    params: params,
-                    url: window.location.href,
-                    timestamp: new Date().toISOString(),
-                    source: 'oauth_callback_page'
-                };
+			
+				
                 
                 // 方法1: 通过postMessage通知父窗口（如果是通过window.open打开的）
                 if (window.opener && !window.opener.closed) {
                     try {
-                        window.opener.postMessage({
-                            type: 'OAUTH_CALLBACK',
-                            params: params,
-                            url: window.location.href
-                        }, '*'); // 生产环境建议替换为具体的源
+                        window.opener.postMessage(params, '*'); // 生产环境建议替换为具体的源
                         
                         console.log('✅ postMessage已发送到父窗口');
                         serverStatusText.innerHTML = '✅ 已通过postMessage通知父窗口<br>';
