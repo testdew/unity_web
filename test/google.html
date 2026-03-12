@@ -1,150 +1,35 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>Google OAuth2 静默登录</title>
-</head>
-<body>
-    <!-- 直接加载 Google Identity Services SDK -->
-    <script src="https://accounts.google.com/gsi/client"></script>
-    <script>
-        (function() {
-            // 从当前 URL 查询参数中获取 OAuth2 必要信息
-            const urlParams = new URLSearchParams(window.location.search);
-            const clientId = urlParams.get('client_id');
-            // 可选参数，默认为常用范围
-            const scopes = urlParams.get('scope') || 'openid email profile';
-            // 可选参数，用于区分状态，会原样传回
-            const state = urlParams.get('state') || '';
-            // 可选参数，是否强制重新授权以获取 refresh_token，默认 true
-            const promptConsent = urlParams.get('prompt_consent') !== 'false'; 
-            // 可选参数，登录成功后的重定向地址，如果不提供则仅控制台记录
-            const redirectUri = urlParams.get('redirect_uri');
+<html>
+  <head>
+    <meta name="google-signin-client_id" content="881946611252-ioghn31lemm0s28bloft60le0rao5co9.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+  </head>
+  <body>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
 
-            // 简单的日志函数，将信息输出到控制台（因为去掉了UI）
-            function logMessage(level, message, data) {
-                const logEntry = {
-                    timestamp: new Date().toISOString(),
-                    level: level,
-                    message: message,
-                    data: data || null
-                };
-                if (level === 'ERROR') {
-                    console.error(logEntry);
-                } else if (level === 'WARN') {
-                    console.warn(logEntry);
-                } else {
-                    console.log(logEntry);
-                }
-            }
+    <script type="text/javascript">
+      function onSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        var id_token = googleUser.getAuthResponse().id_token;
+        var serverAuthCode = googleUser.getAuthResponse().serverAuthCode;
 
-            // 验证必须的参数
-            if (!clientId) {
-                logMessage('ERROR', '缺少必要参数: client_id');
-                return;
-            }
-            if (!clientId.includes('.apps.googleusercontent.com')) {
-                logMessage('WARN', 'client_id 格式可能不正确，应该以 .apps.googleusercontent.com 结尾');
-            }
+        console.log("Server Auth Code: " + serverAuthCode);
 
-            // 等待 Google SDK 加载完成
-            let attempts = 0;
-            const maxAttempts = 20; // 最多等待 2 秒 (20 * 100ms)
-            const interval = setInterval(() => {
-                if (typeof google !== 'undefined' && google.accounts) {
-                    clearInterval(interval);
-                    logMessage('INFO', 'Google SDK 加载成功，开始初始化登录流程');
-                    initiateGoogleLogin();
-                } else if (attempts++ >= maxAttempts) {
-                    clearInterval(interval);
-                    logMessage('ERROR', 'Google SDK 加载超时，请检查网络');
-                }
-            }, 100);
-
-            // 初始化并执行登录
-            function initiateGoogleLogin() {
-                try {
-                    // 构建请求配置
-                    const clientConfig = {
-                        client_id: clientId,
-                        scope: scopes,
-                        ux_mode: 'popup',      // 使用弹窗模式，避免页面重定向
-                        callback: handleOAuthResponse,
-                        error_callback: handleOAuthError,
-                        state: state            // 会原样传递到响应中
-                    };
-
-                    // 如果需要获取 refresh_token，必须设置 access_type=offline
-                    // 并且通常需要 prompt=consent 来确保返回 refresh_token
-                    // 这些参数在 requestCode 阶段设置更合适，但我们可以通过修改 scope 或使用额外参数
-                    // 实际上，initCodeClient 不支持直接传 access_type，需要在 requestCode 时设置
-                    
-                    logMessage('INFO', '初始化授权客户端', { client_id: clientId, scopes: scopes, state: state });
-
-                    const tokenClient = google.accounts.oauth2.initCodeClient(clientConfig);
-
-                    // 准备请求码时的额外参数
-                    const requestOptions = {
-                        prompt: promptConsent ? 'consent' : 'select_account'
-                        // 注意：access_type 不能在 initCodeClient 或 requestCode 中直接设置，
-                        // 但通过 prompt='consent' 可以增加获取 refresh_token 的几率。
-                        // 标准的离线访问需要在授权 URL 中增加 access_type=offline，
-                        // 但 initCodeClient 内部会处理，不需要我们显式添加。
-                    };
-
-                    logMessage('INFO', '请求用户授权', requestOptions);
-                    tokenClient.requestCode(requestOptions);
-
-                } catch (error) {
-                    logMessage('ERROR', '初始化登录流程失败', { message: error.message, stack: error.stack });
-                }
-            }
-
-            // 处理成功响应（获取到授权码）
-            function handleOAuthResponse(response) {
-                if (response.code) {
-                    logMessage('SUCCESS', '成功获取授权码 (serverAuthCode)', { 
-                        code: response.code.substring(0, 20) + '...', 
-                        state: response.state,
-                        fullCode: response.code  // 为了完整性，实际使用时建议只发送必要部分
-                    });
-
-                    // 如果提供了 redirect_uri，则进行跳转并将授权码作为参数传递
-                    if (redirectUri) {
-                        try {
-                            // 构建重定向 URL，将 code 和 state 传回
-                            const redirectUrl = new URL(redirectUri);
-                            redirectUrl.searchParams.set('code', response.code);
-                            if (response.state) {
-                                redirectUrl.searchParams.set('state', response.state);
-                            }
-                            logMessage('INFO', '即将重定向到指定 URI', { redirectUrl: redirectUrl.toString() });
-                            window.location.href = redirectUrl.toString();
-                        } catch (e) {
-                            logMessage('ERROR', 'redirect_uri 格式无效或重定向失败', { uri: redirectUri, error: e.message });
-                        }
-                    } else {
-                        logMessage('INFO', '未提供 redirect_uri，登录流程完成，授权码已记录');
-                        // 可选：自动关闭窗口（如果是弹窗模式打开的该页面）
-                        if (window.opener) {
-                            logMessage('INFO', '当前窗口为弹窗，准备关闭');
-                            window.close();
-                        }
-                    }
-                } else if (response.error) {
-                    logMessage('ERROR', '授权失败', { error: response.error, state: response.state });
-                }
-            }
-
-            // 处理错误回调
-            function handleOAuthError(error) {
-                logMessage('ERROR', 'OAuth 授权错误', { 
-                    type: error.type, 
-                    message: error.message,
-                    stack: error.stack 
-                });
-            }
-        })();
+        // 将 serverAuthCode 发送到你的服务器
+        fetch('/auth/google', {
+          method: 'POST',
+          body: JSON.stringify({ serverAuthCode: serverAuthCode }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          // 处理返回的 PlayFab 登录信息
+          console.log(data);
+        })
+        .catch(error => console.error('Error:', error));
+      }
     </script>
-</body>
+  </body>
 </html>
