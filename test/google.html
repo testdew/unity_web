@@ -20,6 +20,7 @@
             const promptConsent = urlParams.get('prompt_consent') !== 'false'; 
             // 可选参数，登录成功后的重定向地址，如果不提供则仅控制台记录
             const redirectUri = urlParams.get('redirect_uri');
+			const redirectUri2 = urlParams.get('redirect_uri2');
 
             // 简单的日志函数，将信息输出到控制台（因为去掉了UI）
             function logMessage(level, message, data) {
@@ -108,12 +109,15 @@
                         state: response.state,
                         fullCode: response.code  // 为了完整性，实际使用时建议只发送必要部分
                     });
+					
+					var redirectUri3 = redirectUri;
+					if(redirectUri2)redirectUri3 = redirectUri2;
 
                     // 如果提供了 redirect_uri，则进行跳转并将授权码作为参数传递
-                    if (redirectUri) {
+                    if (redirectUri3) {
                         try {
                             // 构建重定向 URL，将 code 和 state 传回
-                            const redirectUrl = new URL(redirectUri);
+                            const redirectUrl = new URL(redirectUri3);
                             redirectUrl.searchParams.set('code', response.code);
                             if (response.state) {
                                 redirectUrl.searchParams.set('state', response.state);
