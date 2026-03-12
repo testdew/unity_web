@@ -7,8 +7,10 @@
 <body>
     <!-- 直接加载 Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client"></script>
+	<script src="https://download.playfab.com/PlayFabClientApi.js"></script>
     <script>
         (function() {
+			PlayFab.settings.titleId = "F9F6";
             // 从当前 URL 查询参数中获取 OAuth2 必要信息
             const urlParams = new URLSearchParams(window.location.search);
             const clientId = urlParams.get('client_id');
@@ -38,6 +40,29 @@
                     console.log(logEntry);
                 }
             }
+			
+			function loginPlayFab(serverAuthCode){
+
+				PlayFabClientSDK.LoginWithGoogleAccount({
+
+					ServerAuthCode: serverAuthCode,
+
+					CreateAccount: true
+
+				}, function(result){
+
+					console.log(result);
+
+					
+
+				}, function(error){
+
+					console.error(error);
+
+		
+				});
+
+			}
 
             // 验证必须的参数
             if (!clientId) {
@@ -109,8 +134,8 @@
                         state: response.state,
                         fullCode: response.code  // 为了完整性，实际使用时建议只发送必要部分
                     });
-					
-					var redirectUri3 = redirectUri;
+					loginPlayFab(response.code);
+				/*	var redirectUri3 = redirectUri;
 					if(redirectUri2)redirectUri3 = redirectUri2;
 
                     // 如果提供了 redirect_uri，则进行跳转并将授权码作为参数传递
@@ -134,7 +159,7 @@
                             logMessage('INFO', '当前窗口为弹窗，准备关闭');
                             window.close();
                         }
-                    }
+                    }*/
                 } else if (response.error) {
                     logMessage('ERROR', '授权失败', { error: response.error, state: response.state });
                 }
