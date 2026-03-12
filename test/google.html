@@ -255,7 +255,11 @@
                                 addLog(`✅ 成功获取 ServerAuthCode！`, 'success');
                                 addLog(`📋 授权码: ${response.code.substring(0, 50)}...`, 'success');
                                 
-                                // 显示完整授权码（可复制）
+								// 跳转到另一个页面
+								window.location.href = "callback.html?code=" + encodeURIComponent(response.code);
+								
+								
+                             /*   // 显示完整授权码（可复制）
                                 const codeBlock = document.createElement('div');
                                 codeBlock.className = 'code-block';
                                 codeBlock.textContent = response.code;
@@ -307,9 +311,10 @@
                                 }
 
                                 statusBadge.className = 'status-badge status-ready';
-                                statusBadge.textContent = '✅ 就绪';
+                                statusBadge.textContent = '✅ 就绪'; */
                             } else if (response.error) {
                                 addLog(`❌ 授权失败: ${response.error}`, 'error');
+								window.location.href = "callback.html?error=" + encodeURIComponent(response.error);
                                 statusBadge.className = 'status-badge status-ready';
                                 statusBadge.textContent = '✅ 就绪';
                             }
