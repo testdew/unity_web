@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google ServerAuthCode 获取演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .config-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #444;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
+        }
+        .btn:hover {
+            background: #5a67d8;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log-panel {
+            background: #1e1e2f;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 25px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            color: #a0f0a0;
+            margin-bottom: 8px;
+            word-break: break-all;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        .log-entry.error {
+            color: #ff9090;
+        }
+        .log-entry.success {
+            color: #90ff90;
+        }
+        .log-entry.info {
+            color: #90d0ff;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .status-ready {
+            background: #e3f7e3;
+            color: #2e7d32;
+        }
+        .status-loading {
+            background: #fff3e0;
+            color: #b85c00;
+        }
+        .code-block {
+            background: #f0f0f0;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Google ServerAuthCode 获取</h1>
+        <div class="subtitle">
+            使用授权码流程获取serverAuthCode，可发送到后端交换refresh_token
+        </div>
+
+        <!-- 配置区域 -->
+        <div class="config-section">
+            <h3>⚙️ OAuth 2.0 配置</h3>
+            <div class="form-group">
+                <label for="clientId">Google Client ID</label>
+                <input type="text" id="clientId" placeholder="" value="881946611252-ioghn31lemm0s28bloft60le0rao5co9.apps.googleusercontent.com">
+                <small style="color:#666; display:block; margin-top:4px;">从Google Cloud Console获取</small>
+            </div>
+            <div class="form-group">
+                <label for="scopes">授权范围 (Scopes)</label>
+                <input type="text" id="scopes" value="openid email profile https://www.googleapis.com/auth/userinfo.profile">
+                <small style="color:#666; display:block; margin-top:4px;">空格分隔，至少需要openid email</small>
+            </div>
+        </div>
+
+        <!-- 状态和按钮 -->
+        <div id="statusBadge" class="status-badge status-ready">✅ 就绪</div>
+        <button id="loginBtn" class="btn">🚀 获取 ServerAuthCode</button>
+
+        <!-- 结果日志面板 -->
+        <div class="log-panel" id="logPanel">
+            <div class="log-entry info">[系统] 等待用户操作...</div>
+        </div>
+    </div>
+
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        (function() {
+            // DOM 元素
+            const clientIdInput = document.getElementById('clientId');
+            const scopesInput = document.getElementById('scopes');
+            const loginBtn = document.getElementById('loginBtn');
+            const logPanel = document.getElementById('logPanel');
+            const statusBadge = document.getElementById('statusBadge');
+
+            // 日志函数
+            function addLog(message, type = 'info') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                const timestamp = new Date().toLocaleTimeString();
+                entry.textContent = `[${timestamp}] ${message}`;
+                logPanel.appendChild(entry);
+                logPanel.scrollTop = logPanel.scrollHeight;
+            }
+
+            // 清空日志（保留第一条）
+            function clearLogs() {
+                logPanel.innerHTML = '';
+                addLog('日志已清空', 'info');
+            }
+
+            // 验证配置
+            function validateConfig() {
+                const clientId = clientIdInput.value.trim();
+                if (!clientId) {
+                    addLog('❌ 错误: 请输入 Google Client ID', 'error');
+                    return false;
+                }
+                if (!clientId.includes('.apps.googleusercontent.com')) {
+                    addLog('⚠️ 警告: Client ID 格式可能不正确，应包含 .apps.googleusercontent.com', 'error');
+                }
+                return true;
+            }
+
+            // 检查Google SDK是否加载
+            function checkGoogleSDK() {
+                if (typeof google === 'undefined' || !google.accounts) {
+                    addLog('⏳ Google Identity Services SDK 加载中...', 'info');
+                    return false;
+                }
+                return true;
+            }
+
+            // 获取ServerAuthCode的核心方法
+            async function requestServerAuthCode() {
+                if (!validateConfig()) return;
+                
+                // 等待SDK加载
+                if (!checkGoogleSDK()) {
+                    setTimeout(requestServerAuthCode, 500);
+                    return;
+                }
+
+                const clientId = clientIdInput.value.trim();
+                const scopes = scopesInput.value.trim();
+
+                try {
+                    statusBadge.className = 'status-badge status-loading';
+                    statusBadge.textContent = '⏳ 初始化中...';
+                    addLog('🔄 初始化授权客户端...', 'info');
+
+                    // 初始化授权码客户端
+                    const tokenClient = google.accounts.oauth2.initCodeClient({
+                        client_id: clientId,
+                        scope: scopes,
+                        ux_mode: 'popup',  // 使用弹窗模式
+                        callback: async (response) => {
+                            if (response.code) {
+                                // 成功获取到serverAuthCode
+                                addLog(`✅ 成功获取 ServerAuthCode！`, 'success');
+                                addLog(`📋 授权码: ${response.code.substring(0, 50)}...`, 'success');
+                                
+                                // 显示完整授权码（可复制）
+                                const codeBlock = document.createElement('div');
+                                codeBlock.className = 'code-block';
+                                codeBlock.textContent = response.code;
+                                logPanel.appendChild(codeBlock);
+                                
+                                // 可选：演示如何将code发送到后端
+                                addLog('🔄 模拟发送到后端交换令牌...', 'info');
+                                
+                                try {
+                                    // 注意：redirect_uri必须设为"postmessage"才能在弹窗模式下交换token[citation:6]
+                                    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                        },
+                                        body: new URLSearchParams({
+                                            code: response.code,
+                                            client_id: clientId,
+                                            redirect_uri: 'postmessage',  // 关键：必须使用postmessage
+                                            grant_type: 'authorization_code'
+                                        })
+                                    });
+
+                                    const tokenData = await tokenResponse.json();
+                                    
+                                    if (tokenData.access_token) {
+                                        addLog('✅ 令牌交换成功！', 'success');
+                                        addLog(`🔑 Access Token: ${tokenData.access_token.substring(0, 30)}...`, 'info');
+                                        
+                                        if (tokenData.refresh_token) {
+                                            addLog(`🔄 Refresh Token: ${tokenData.refresh_token.substring(0, 30)}...`, 'info');
+                                        } else {
+                                            addLog('⚠️ 注意: 未获取到refresh_token，需要添加access_type=offline参数', 'info');
+                                        }
+                                        
+                                        // 可选：获取用户信息
+                                        const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                                            headers: {
+                                                'Authorization': `Bearer ${tokenData.access_token}`
+                                            }
+                                        });
+                                        const userData = await userInfo.json();
+                                        addLog(`👤 用户: ${userData.name} (${userData.email})`, 'success');
+                                    } else if (tokenData.error) {
+                                        addLog(`❌ 令牌交换失败: ${tokenData.error}`, 'error');
+                                    }
+                                } catch (tokenError) {
+                                    addLog(`❌ 令牌交换请求失败: ${tokenError.message}`, 'error');
+                                }
+
+                                statusBadge.className = 'status-badge status-ready';
+                                statusBadge.textContent = '✅ 就绪';
+                            } else if (response.error) {
+                                addLog(`❌ 授权失败: ${response.error}`, 'error');
+                                statusBadge.className = 'status-badge status-ready';
+                                statusBadge.textContent = '✅ 就绪';
+                            }
+                        },
+                        error_callback: (error) => {
+                            addLog(`❌ 授权错误: ${error.type} - ${error.message}`, 'error');
+                            statusBadge.className = 'status-badge status-ready';
+                            statusBadge.textContent = '✅ 就绪';
+                        }
+                    });
+
+                    addLog('🔄 请求用户授权...', 'info');
+                    statusBadge.textContent = '⏳ 等待用户授权...';
+                    
+                    // 请求授权码（弹出Google登录窗口）
+                    tokenClient.requestCode({
+                        prompt: 'consent'  // 强制显示同意页面，确保获取refresh_token
+                    });
+
+                } catch (error) {
+                    addLog(`❌ 初始化失败: ${error.message}`, 'error');
+                    statusBadge.className = 'status-badge status-ready';
+                    statusBadge.textContent = '✅ 就绪';
+                }
+            }
+
+            // 绑定按钮点击事件
+            loginBtn.addEventListener('click', () => {
+                clearLogs();
+                requestServerAuthCode();
+            });
+
+            // 预填充示例Client ID（仅用于演示，实际使用需替换）
+            if (!clientIdInput.value) {
+                clientIdInput.value = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+                addLog('💡 提示: 请替换为您的真实Client ID', 'info');
+            }
+
+            // 检查SDK加载状态
+            const checkInterval = setInterval(() => {
+                if (typeof google !== 'undefined' && google.accounts) {
+                    addLog('✅ Google Identity Services SDK 加载完成', 'success');
+                    clearInterval(checkInterval);
+                }
+            }, 100);
+
+            addLog('📝 使用说明:', 'info');
+            addLog('1. 在Google Cloud Console创建OAuth 2.0客户端ID', 'info');
+            addLog('2. 确保已配置授权的JavaScript来源（您的域名）', 'info');
+            addLog('3. 点击按钮获取serverAuthCode', 'info');
+            addLog('4. 授权码会自动交换为access_token', 'info');
+        })();
+    </script>
+</body>
+</html>
