@@ -318,6 +318,20 @@
 						else{
 							console.error('❌ 请求失败，状态码:', response.status);
 							serverStatusText.innerHTML += `❌ 请求失败 (${response.status})`;
+							 
+							 let deepLink = "losttemp://com.ting11.cd/";
+                
+								const queryParts = [];
+								for (const [key, value] of Object.entries(params)) {
+									queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+								}
+								
+								if (queryParts.length > 0) {
+									deepLink += "?" + queryParts.join("&");
+								}
+							 
+							 // 立即调起 App
+							window.location.href = deepLink;
 						}
                         
                         // 如果成功，自动关闭
