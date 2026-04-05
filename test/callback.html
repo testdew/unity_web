@@ -319,7 +319,20 @@
 							console.error('❌ 请求失败，状态码:', response.status);
 							serverStatusText.innerHTML += `❌ 请求失败 (${response.status})`;
 							 
-							 let deepLink = "losttemp://com.ting11.cd/";
+							 
+						}
+                        
+                        // 如果成功，自动关闭
+                       // if (isSuccess)
+						{
+                            startAutoClose();
+                        }
+                    } catch (error) {
+                        console.error('❌ 通知本地服务器失败:', error);
+                        serverStatusText.innerHTML += '❌ 通知本地服务器失败: ' + error.message;
+                        
+						
+						let deepLink = "losttemp://com.ting11.cd/";
                 
 								const queryParts = [];
 								for (const [key, value] of Object.entries(params)) {
@@ -332,17 +345,8 @@
 							 
 							 // 立即调起 App
 							window.location.href = deepLink;
-						}
-                        
-                        // 如果成功，自动关闭
-                       // if (isSuccess)
-						{
-                            startAutoClose();
-                        }
-                    } catch (error) {
-                        console.error('❌ 通知本地服务器失败:', error);
-                        serverStatusText.innerHTML += '❌ 通知本地服务器失败: ' + error.message;
-                        
+						
+						
                         // 显示重试按钮
                         document.getElementById('retryBtn').classList.remove('hidden');
                     }
