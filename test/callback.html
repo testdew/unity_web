@@ -331,20 +331,22 @@
                         console.error('❌ 通知本地服务器失败:', error);
                         serverStatusText.innerHTML += '❌ 通知本地服务器失败: ' + error.message;
                         
-						serverStatusText.innerHTML += 'deepLink ' ;
-						let deepLink = "losttemp://com.ting11.cd/";
-                
-								const queryParts = [];
-								for (const [key, value] of Object.entries(params)) {
-									queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
-								}
-								
-								if (queryParts.length > 0) {
-									deepLink += "?" + queryParts.join("&");
-								}
-							 serverStatusText.innerHTML += deepLink ;
-							 // 立即调起 App
+						if(params['plat']=='android'||params['plat']=='ios'){
+							serverStatusText.innerHTML += 'deepLink ' ;
+							let deepLink = "losttemp://com.ting11.cd/";
+					
+							const queryParts = [];
+							for (const [key, value] of Object.entries(params)) {
+								queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+							}
+							
+							if (queryParts.length > 0) {
+								deepLink += "?" + queryParts.join("&");
+							}
+							serverStatusText.innerHTML += deepLink ;
+							// 立即调起 App
 							window.location.href = deepLink;
+						}
 						
 						
                         // 显示重试按钮
