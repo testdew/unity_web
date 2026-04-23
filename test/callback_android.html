@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+</head>
+<body>
+    <script>
+        (function() {
+            // 获取当前页面文件名（例如：callback_ios.html）
+            var pathParts = window.location.pathname.split('/');
+            var fileName = pathParts[pathParts.length - 1];
+            
+            // 从文件名中提取平台标识（匹配 callback_xxx.html 中的 xxx）
+            var match = fileName.match(/callback_([a-zA-Z0-9]+)\.html$/);
+            var platform = match ? match[1] : null;
+            
+            // 如果没有匹配到平台标识（例如直接访问 callback.html），则不添加 plat 参数
+            if (platform) {
+                // 获取当前 URL 中的所有参数
+                var params = new URLSearchParams(window.location.search);
+                
+                // 设置 plat 参数（如果已存在则覆盖）
+                params.set('plat', platform);
+                
+                // 构建目标 URL（将 callback_xxx.html 替换为 callback.html）
+                var basePath = window.location.pathname.replace(/callback_[^/]+\.html$/, 'callback.html');
+                var redirectUrl = basePath + '?' + params.toString();
+                
+                // 执行重定向
+                window.location.replace(redirectUrl);
+            } else {
+                // 已经是 callback.html 或文件名格式不符，不做处理（可选：直接跳转到 callback.html）
+                var basePath = window.location.pathname.replace(/[^/]+\.html$/, 'callback.html');
+                window.location.replace(basePath + window.location.search);
+            }
+        })();
+    </script>
+</body>
+</html>
