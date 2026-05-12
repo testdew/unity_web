@@ -408,6 +408,7 @@
          */
         function closeWindow() {
             console.log('closeWindow');
+			window.location.href = 'about:blank';
 			// 方法1：标准关闭
             try { window.close(); } catch(e) { console.log('close failed:', e); }
             
