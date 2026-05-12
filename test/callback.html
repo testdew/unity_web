@@ -278,8 +278,6 @@
                             notifyUrl.searchParams.append(key, value);
                         }
                         
-                        console.log('GET请求URL:', notifyUrl.toString());
-                        
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
                         
@@ -293,33 +291,16 @@
                             mode: 'cors' // 使用cors模式
                         });
                         
-					   
-                        /*
-                        const response = await fetch(CONFIG.LOCAL_SERVER_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify(notifyData),
-                          //  signal: controller.signal,
-                            mode: 'no-cors' // 允许跨域请求
-                        });
-						*/
-                        
                       //  clearTimeout(timeoutId);
                         // ✅ 判断成功的几种方式
 						if (response.ok) { // 状态码在200-299之间
 							console.log('✅ 请求成功，状态码:', response.status);
 							console.log('✅ 本地服务器通知已发送');
 							serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
-							
 						}
 						else{
 							console.error('❌ 请求失败，状态码:', response.status);
 							serverStatusText.innerHTML += `❌ 请求失败 (${response.status})`;
-							 
-							 
 						}
                         
                         // 如果成功，自动关闭
@@ -347,42 +328,17 @@
 							// 立即调起 App
 							window.location.href = deepLink;
 						}
-						
-						
                         // 显示重试按钮
                         document.getElementById('retryBtn').classList.remove('hidden');
                     }
                 }
-                
-                // 方法3: 使用图片Ping方式（备选方案，适用于不支持fetch的旧浏览器）
-                if (!CONFIG.USE_FETCH) {
-                    sendBeaconNotification(params);
-                }
-                
             } catch (e) {
                 console.error('通知过程出错:', e);
                 serverStatusText.innerHTML = '❌ 通知过程出错: ' + e.message;
                 document.getElementById('retryBtn').classList.remove('hidden');
             }
         }
-
-        /**
-         * 使用sendBeacon发送通知（更可靠，即使页面关闭也会发送）
-         */
-        function sendBeaconNotification(params) {
-
-            const blob = new Blob([params], { type: 'application/json' });
-            const sent = navigator.sendBeacon(CONFIG.LOCAL_SERVER_URL, blob);
-            
-            if (sent) {
-                console.log('✅ sendBeacon发送成功');
-                document.getElementById('serverStatusText').innerHTML += '✅ sendBeacon发送成功';
-            } else {
-                console.warn('⚠️ sendBeacon发送失败');
-                document.getElementById('serverStatusText').innerHTML += '⚠️ sendBeacon发送失败';
-            }
-        }
-
+		
         /**
          * 显示URL参数
          */
@@ -460,7 +416,7 @@
             }, 1000);
             
             setTimeout(() => {
-                window.close();
+                closeWindow();
             }, CONFIG.AUTO_CLOSE_DELAY);
         }
 
@@ -468,7 +424,26 @@
          * 手动关闭窗口
          */
         function closeWindow() {
-            window.close();
+            // 方法1：标准关闭
+            try { window.close(); } catch(e) { console.log('close failed:', e); }
+            
+            // 方法2：尝试打开空白页然后关闭
+            setTimeout(() => {
+                try {
+                    window.open('', '_self', '');
+                    window.close();
+                } catch(e) {}
+            }, 100);
+            
+            // 方法3：使用window.opener
+            setTimeout(() => {
+                try {
+                    if (window.opener) {
+                        window.opener.focus();
+                        window.close();
+                    }
+                } catch(e) {}
+            }, 200);
         }
 
         /**
