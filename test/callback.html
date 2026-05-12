@@ -244,13 +244,10 @@
             
             try {
 			
-				
-                
                 // 方法1: 通过postMessage通知父窗口（如果是通过window.open打开的）
                 if (window.opener && !window.opener.closed) {
                     try {
                         window.opener.postMessage(params, '*'); // 生产环境建议替换为具体的源
-                        
                         console.log('✅ postMessage已发送到父窗口');
                         serverStatusText.innerHTML = '✅ 已通过postMessage通知父窗口<br>';
                     } catch (e) {
@@ -262,11 +259,6 @@
                 // 方法2: 通过fetch通知本地服务器
                 if (CONFIG.USE_FETCH) {
                     try {
-                       // const controller = new AbortController();
-                       // const  = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
-					   
-					   
-					  
 					    const notifyUrl = new URL(CONFIG.LOCAL_SERVER_URL);
                         
                         // 添加所有参数到URL
@@ -281,33 +273,24 @@
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), CONFIG.NOTIFY_TIMEOUT);
                         
-                        // 使用GET请求，没有body
                         const response = await fetch(notifyUrl.toString(), {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json'
                             },
                             signal: controller.signal,
-                            mode: 'cors' // 使用cors模式
+                            mode: 'cors' 
                         });
-                        
-                      //  clearTimeout(timeoutId);
-                        // ✅ 判断成功的几种方式
-						if (response.ok) { // 状态码在200-299之间
-							console.log('✅ 请求成功，状态码:', response.status);
-							console.log('✅ 本地服务器通知已发送');
-							serverStatusText.innerHTML += '✅ 已通知本地服务器 (http://localhost:5000)';
+
+						if (response.ok) { 
+							serverStatusText.innerHTML += '✅ 已通知本地服务器';
 						}
 						else{
 							console.error('❌ 请求失败，状态码:', response.status);
 							serverStatusText.innerHTML += `❌ 请求失败 (${response.status})`;
 						}
                         
-                        // 如果成功，自动关闭
-                       // if (isSuccess)
-						{
-                            startAutoClose();
-                        }
+                        startAutoClose();
                     } catch (error) {
                         console.error('❌ 通知本地服务器失败:', error);
                         serverStatusText.innerHTML += '❌ 通知本地服务器失败: ' + error.message;
@@ -424,7 +407,8 @@
          * 手动关闭窗口
          */
         function closeWindow() {
-            // 方法1：标准关闭
+            console.log('closeWindow');
+			// 方法1：标准关闭
             try { window.close(); } catch(e) { console.log('close failed:', e); }
             
             // 方法2：尝试打开空白页然后关闭
