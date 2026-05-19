@@ -347,7 +347,7 @@ function renderPlayFabPlayers(players) {
         const statusClass = isBanned ? 'playfab-badge-banned' : 'playfab-badge-normal';
         
         html += '<tr>';
-        html += `<td><code>${playFabIdEscaped}</code></tr>`;
+        html += `<td><code>${playFabIdEscaped}</code></td>`;
         html += `<td>${displayNameEscaped}</td>`;
         html += `<td>💎 ${p.diamondBalance || 0}</td>`;
         html += `<td><span class="playfab-badge ${statusClass}">${statusText}</span></td>`;
