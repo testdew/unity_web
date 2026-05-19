@@ -18,6 +18,10 @@
             color: #fff;
             padding: 20px;
             margin: 0;
+            box-sizing: border-box;
+        }
+        * {
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -53,7 +57,7 @@
             </div>
 
             <!-- 高级筛选面板 -->
-            <div id="advancedSearchPanel" class="advanced-panel">
+            <div id="advancedSearchPanel" class="advanced-panel" style="display: none;">
                 <div class="filter-row">
                     <div class="filter-group">
                         <label>最近登录(≤天数)</label>
@@ -180,21 +184,44 @@
 
     <script>
         // ==================== 高度自适应 ====================
-        // 页面加载完成和内容变化时，通知父页面调整 iframe 高度
-        function notifyParentResize() {
+        // 发送高度给父页面
+        function sendHeightToParent() {
             if (window.parent && window.parent !== window) {
-                const height = document.body.scrollHeight;
+                // 获取实际内容高度
+                const body = document.body;
+                const html = document.documentElement;
+                const height = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                const finalHeight = Math.max(height, 500);
+                
                 window.parent.postMessage({
                     type: 'resizeIframe',
-                    height: height
+                    height: finalHeight
                 }, '*');
             }
         }
         
-        // 监听 DOM 变化，自动调整高度
+        // 延迟发送，等待 DOM 渲染完成
+        function debouncedSendHeight() {
+            setTimeout(sendHeightToParent, 50);
+        }
+        
+        // 监听来自父页面的消息
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'requestResize') {
+                sendHeightToParent();
+            }
+        });
+        
+        // 监听 DOM 变化
         function observeDOMChanges() {
-            const observer = new MutationObserver(function(mutations) {
-                notifyParentResize();
+            const observer = new MutationObserver(function() {
+                debouncedSendHeight();
             });
             
             observer.observe(document.body, {
@@ -203,21 +230,21 @@
                 attributes: true,
                 attributeFilter: ['style', 'class']
             });
-            
-            // 初始调整
-            setTimeout(notifyParentResize, 100);
         }
         
-        // 窗口加载完成后调整高度
+        // 窗口加载完成后发送高度
         window.addEventListener('load', function() {
-            notifyParentResize();
+            sendHeightToParent();
             observeDOMChanges();
         });
         
-        // 窗口大小变化时也调整
+        // 窗口大小变化时发送高度
         window.addEventListener('resize', function() {
-            notifyParentResize();
+            debouncedSendHeight();
         });
+        
+        // 初始发送
+        setTimeout(sendHeightToParent, 100);
         
         // ==================== 全局变量 ====================
         let currentPlayFabPlayers = [];
@@ -249,7 +276,7 @@
         // 检查配置
         if (!TITLE_ID || !SECRET_KEY) {
             document.getElementById('playfabPlayersList').innerHTML = '<div class="empty-state">❌ 配置错误<br>缺少 titleId 或 secretKey 参数</div>';
-            notifyParentResize();
+            sendHeightToParent();
         } else {
             init();
         }
@@ -370,7 +397,7 @@
                 html += `<option value="${segments[i].Id}">${escapeHtml(segments[i].Name)} (${segments[i].Id.substring(0, 8)}...)</option>`;
             }
             select.innerHTML = html;
-            notifyParentResize();
+            sendHeightToParent();
         }
         
         async function loadSegmentsList() {
@@ -408,8 +435,9 @@
             const panel = document.getElementById('advancedSearchPanel');
             if (panel) {
                 showAdvancedSearch = !showAdvancedSearch;
-                panel.classList.toggle('show', showAdvancedSearch);
-                notifyParentResize();
+                panel.style.display = showAdvancedSearch ? 'flex' : 'none';
+                // 高度变化后立即发送通知
+                setTimeout(sendHeightToParent, 100);
             }
         }
         
@@ -421,7 +449,7 @@
             document.getElementById('filterBannedStatus').value = '';
             document.getElementById('filterSegmentId').value = '';
             toast('筛选条件已重置', false);
-            notifyParentResize();
+            sendHeightToParent();
         }
         
         async function advancedSearch() {
@@ -432,17 +460,18 @@
         function showBanModal(playFabId) {
             currentBanPlayerId = playFabId;
             const modal = document.getElementById('playfabBanModal');
-            if (modal) modal.classList.add('show');
+            if (modal) modal.style.display = 'flex';
             document.getElementById('banReason').value = '';
             document.getElementById('banDuration').value = '0';
             document.getElementById('banIpAddress').value = '';
+            sendHeightToParent();
         }
         
         function closeBanModal() {
             const modal = document.getElementById('playfabBanModal');
-            if (modal) modal.classList.remove('show');
+            if (modal) modal.style.display = 'none';
             currentBanPlayerId = null;
-            notifyParentResize();
+            sendHeightToParent();
         }
         
         async function confirmBan() {
@@ -461,16 +490,17 @@
         function showUpdateBanModal(banId, currentReason, currentDurationHours) {
             currentUpdateBanId = banId;
             const modal = document.getElementById('playfabUpdateBanModal');
-            if (modal) modal.classList.add('show');
+            if (modal) modal.style.display = 'flex';
             document.getElementById('updateBanReason').value = currentReason || '';
             document.getElementById('updateBanDuration').value = currentDurationHours || 0;
+            sendHeightToParent();
         }
         
         function closeUpdateBanModal() {
             const modal = document.getElementById('playfabUpdateBanModal');
-            if (modal) modal.classList.remove('show');
+            if (modal) modal.style.display = 'none';
             currentUpdateBanId = null;
-            notifyParentResize();
+            sendHeightToParent();
         }
         
         async function confirmUpdateBan() {
@@ -500,7 +530,7 @@
             if (!container) return;
             if (!players || players.length === 0) { 
                 container.innerHTML = '<div class="empty-state">暂无玩家数据</div>';
-                notifyParentResize();
+                sendHeightToParent();
                 return; 
             }
             let html = '<div class="batch-bar">';
@@ -508,7 +538,7 @@
             html += '<button class="btn btn-danger btn-sm" onclick="batchDeleteSelected()">🗑️ 删除选中</button>';
             html += '<span style="flex:1"></span>';
             html += '<button class="btn btn-outline btn-sm" onclick="showExportModal()">📥 导出全部</button>';
-            html += '</div><div class="table-wrapper"></td><thead><tr>';
+            html += '</div><div class="table-wrapper"><tr><thead><tr>';
             html += '<th style="width:30px;"><input type="checkbox" id="selectAllPlayers" onclick="toggleSelectAll()"></th>';
             html += '<th>PlayFab ID</th><th>显示名</th><th>钻石</th><th>设备数</th><th>状态</th><th>冻结原因</th><th>冻结到期</th><th>操作</th>';
             html += '</tr></thead><tbody>';
@@ -539,11 +569,11 @@
                 } else {
                     html += `<button class="btn btn-danger btn-sm btn-ban" data-playfab-id="${p.playFabId}">冻结</button>`;
                 }
-                html += `</div></td></tr>`;
+                html += `</div></td><tr>`;
             }
             html += '</tbody></table></div>';
             container.innerHTML = html;
-            notifyParentResize();
+            sendHeightToParent();
             // 绑定事件
             document.querySelectorAll('.btn-view-detail').forEach(btn => { btn.onclick = () => viewPlayFabPlayerDetail(btn.getAttribute('data-playfab-id')); });
             document.querySelectorAll('.btn-ban').forEach(btn => { btn.onclick = () => showBanModal(btn.getAttribute('data-playfab-id')); });
@@ -560,24 +590,24 @@
             const selectAll = document.getElementById('selectAllPlayers');
             const checkboxes = document.querySelectorAll('#playfabPlayersList .player-select');
             for (let i = 0; i < checkboxes.length; i++) checkboxes[i].checked = selectAll.checked;
-            notifyParentResize();
+            sendHeightToParent();
         }
         
         // ==================== 导出功能 ====================
         function showExportModal() {
             const modal = document.getElementById('playfabExportModal');
             if (modal) {
-                modal.classList.add('show');
+                modal.style.display = 'flex';
                 const countSpan = document.getElementById('exportCount');
                 if (countSpan) countSpan.innerText = currentPlayFabPlayers.length;
-                notifyParentResize();
+                sendHeightToParent();
             }
         }
         
         function closeExportModal() {
             const modal = document.getElementById('playfabExportModal');
-            if (modal) modal.classList.remove('show');
-            notifyParentResize();
+            if (modal) modal.style.display = 'none';
+            sendHeightToParent();
         }
         
         function doExport() {
@@ -600,27 +630,7 @@
             toast('冻结列表功能需要后端支持', true);
             renderPlayFabPlayers([]);
         }
-        // 监听来自父页面的消息
-window.addEventListener('message', function(event) {
-    if (event.data && event.data.type === 'requestResize') {
-        // 父页面请求发送当前高度
-        notifyParentResize();
-    }
-});
-
-// 增强 notifyParentResize 函数，添加更详细的调试信息
-function notifyParentResize() {
-    if (window.parent && window.parent !== window) {
-        const height = document.body.scrollHeight;
-        // 添加最小高度，避免 iframe 太小
-        const finalHeight = Math.max(height, 400);
-        window.parent.postMessage({
-            type: 'resizeIframe',
-            height: finalHeight
-        }, '*');
-        console.log('发送高度: ' + finalHeight + 'px');
-    }
-}
+        
         // ==================== 初始化 ====================
         function init() {
             loadSegmentsList();
@@ -660,8 +670,8 @@ function notifyParentResize() {
             window.toggleSelectAll = toggleSelectAll;
             window.refreshSegments = refreshSegments;
             
-            // 初始调整高度
-            setTimeout(notifyParentResize, 200);
+            // 初始发送高度
+            setTimeout(sendHeightToParent, 200);
         }
     </script>
 </body>
