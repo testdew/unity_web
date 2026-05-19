@@ -114,23 +114,6 @@
             padding: 40px;
             color: #9ca3af;
         }
-        
-        /* 错误提示 */
-        .error-container {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 20px;
-        }
-        
-        .error-container code {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
-        }
     </style>
 </head>
 <body>
@@ -208,10 +191,10 @@
         // 检查配置是否完整
         if (!titleId || !secretKey) {
             document.getElementById('playfabContent').innerHTML = `
-                <div class="error-container">
+                <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; padding: 20px; border-radius: 12px; text-align: center;">
                     <strong>❌ 配置错误</strong><br>
                     缺少必要的参数，请通过 URL 传入 titleId 和 secretKey<br><br>
-                    示例: <code>admin.html?titleId=XXXX&secretKey=XXXX</code>
+                    示例: <code style="background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 6px;">admin.html?titleId=XXXX&secretKey=XXXX</code>
                 </div>
             `;
         } else {
