@@ -1,340 +1,929 @@
-<!-- PlayFab 管理界面模板 - 卡片样式 -->
-<div class="playfab-card">
-    <div class="playfab-card-header">🎮 PlayFab 玩家管理</div>
-    <div class="playfab-card-body">
-        <!-- 搜索栏 -->
-        <div class="playfab-search-bar">
-            <div class="playfab-form-group">
-                <label>查找类型</label>
-                <select id="playfabSearchType">
-                    <option value="username" selected>显示名称</option>
-                    <option value="playFabId">PlayFab ID</option>
-                </select>
-            </div>
-            <div class="playfab-form-group" style="flex: 2;">
-                <label>关键词</label>
-                <input type="text" id="playfabSearchKeyword" placeholder="请输入显示名称或 PlayFab ID">
-            </div>
-            <button class="playfab-btn playfab-btn-primary" id="playfabSearchBtn">🔍 搜索</button>
-            <button class="playfab-btn playfab-btn-outline" id="playfabAdvancedBtn">⚙️ 高级筛选</button>
-        </div>
-
-        <!-- 高级筛选面板 -->
-        <div id="playfabAdvancedPanel" class="playfab-advanced-panel">
-            <div class="playfab-filter-row">
-                <div class="playfab-filter-group">
-                    <label>最近登录(≤天数)</label>
-                    <input type="number" id="playfabFilterLastLoginDays" placeholder="如: 7">
-                </div>
-                <div class="playfab-filter-group">
-                    <label>未登录(≥天数)</label>
-                    <input type="number" id="playfabFilterNotLoginDays" placeholder="如: 30">
-                </div>
-                <div class="playfab-filter-group">
-                    <label>钻石(最小)</label>
-                    <input type="number" id="playfabFilterMinDiamond" placeholder="0">
-                </div>
-                <div class="playfab-filter-group">
-                    <label>钻石(最大)</label>
-                    <input type="number" id="playfabFilterMaxDiamond" placeholder="10000">
-                </div>
-                <div class="playfab-filter-group">
-                    <label>封禁状态</label>
-                    <select id="playfabFilterBannedStatus">
-                        <option value="">不限</option>
-                        <option value="true">已封禁</option>
-                        <option value="false">正常</option>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayFab 玩家管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: rgba(30, 30, 47, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* 搜索栏 */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            background: #14141f;
+            border: 1px solid #2d2d44;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #2d2d44;
+            color: #fff;
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        
+        /* 高级筛选面板 */
+        .advanced-panel {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 8px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+        
+        /* 批量操作栏 */
+        .batch-bar {
+            margin-bottom: 12px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        /* 表格 */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #9ca3af;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        /* 徽章 */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .badge-approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+        
+        .badge-rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+        
+        /* 弹性布局 */
+        .flex {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        /* 代码样式 */
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1e1e2f;
+            border-radius: 12px;
+            width: 450px;
+            max-width: 90%;
+            padding: 20px;
+            border: 1px solid #2d2d44;
+        }
+        
+        .modal-content h3 {
+            margin-bottom: 15px;
+        }
+        
+        .modal-content .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .modal-content .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        
+        .modal-content .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #14141f;
+            border: 1px solid #2d2d44;
+            border-radius: 8px;
+            color: #fff;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* 导出字段网格 */
+        .export-fields {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .search-bar {
+                flex-direction: column;
+            }
+            .form-group {
+                width: 100%;
+            }
+            .filter-row {
+                flex-direction: column;
+            }
+            .filter-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header"><h3>🎮 PlayFab 玩家管理</h3></div>
+        <div class="card-body">
+            <!-- 搜索栏 -->
+            <div class="search-bar">
+                <div class="form-group">
+                    <label>查找类型</label>
+                    <select id="playfabSearchType">
+                        <option value="username" selected>显示名称</option>
+                        <option value="playFabId">PlayFab ID</option>
                     </select>
                 </div>
-                <div class="playfab-filter-group" style="flex: 2;">
-                    <label>分段筛选</label>
-                    <div style="display: flex; gap: 8px;">
-                        <select id="playfabFilterSegmentId" style="flex: 1;">
-                            <option value="">加载中...</option>
-                        </select>
-                        <button class="playfab-btn playfab-btn-outline" id="playfabRefreshSegmentsBtn" style="padding:8px 12px;" title="刷新分段列表">🔄</button>
-                    </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>关键词</label>
+                    <input type="text" id="playfabSearchKeyword" placeholder="请输入显示名称或 PlayFab ID">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" id="searchBtn">🔍 搜索</button>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-outline" id="advancedSearchBtn">⚙️ 高级筛选</button>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-outline" id="showBannedBtn">📋 冻结列表</button>
                 </div>
             </div>
-            <div class="playfab-filter-actions">
-                <button class="playfab-btn playfab-btn-primary" id="playfabApplyFilterBtn">应用筛选</button>
-                <button class="playfab-btn playfab-btn-outline" id="playfabResetFilterBtn">重置</button>
+
+            <!-- 高级筛选面板 -->
+            <div id="advancedSearchPanel" class="advanced-panel">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>最近登录(≤天数)</label>
+                        <input type="number" id="filterLastLoginDays" placeholder="如: 7">
+                    </div>
+                    <div class="filter-group">
+                        <label>未登录(≥天数)</label>
+                        <input type="number" id="filterNotLoginDays" placeholder="如: 30">
+                    </div>
+                    <div class="filter-group">
+                        <label>钻石(最小)</label>
+                        <input type="number" id="filterMinDiamond" placeholder="0">
+                    </div>
+                    <div class="filter-group">
+                        <label>钻石(最大)</label>
+                        <input type="number" id="filterMaxDiamond" placeholder="10000">
+                    </div>
+                    <div class="filter-group">
+                        <label>封禁状态</label>
+                        <select id="filterBannedStatus">
+                            <option value="">不限</option>
+                            <option value="true">已封禁</option>
+                            <option value="false">正常</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="flex: 2;">
+                        <label>分段筛选</label>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="filterSegmentId" style="flex: 1;">
+                                <option value="">加载中...</option>
+                            </select>
+                            <button class="btn btn-outline" id="refreshSegmentsBtn" style="padding:8px 12px;" title="刷新分段列表">🔄</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="advancedSearchDoBtn">应用筛选</button>
+                    <button class="btn btn-outline" id="resetAdvancedSearchBtn">重置</button>
+                </div>
+            </div>
+
+            <!-- 玩家列表容器 -->
+            <div id="playfabPlayersList" class="table-wrapper">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 封禁弹窗 -->
+    <div id="playfabBanModal" class="modal">
+        <div class="modal-content">
+            <h3>冻结玩家</h3>
+            <div class="form-group">
+                <label>冻结原因</label>
+                <input type="text" id="banReason" placeholder="请输入冻结原因">
+            </div>
+            <div class="form-group">
+                <label>冻结时长（小时，0表示永久）</label>
+                <input type="number" id="banDuration" value="0">
+            </div>
+            <div class="form-group">
+                <label>IP 地址（可选）</label>
+                <input type="text" id="banIpAddress" placeholder="例如: 192.168.1.100">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-outline" id="closeBanModalBtn">取消</button>
+                <button class="btn btn-danger" id="confirmBanBtn">确认冻结</button>
             </div>
         </div>
-
-        <!-- 玩家列表 -->
-        <div id="playfabPlayersList" class="playfab-empty-state">请搜索玩家</div>
     </div>
-</div>
 
-<style>
-    /* 卡片样式 */
-    .playfab-card {
-        background: rgba(30, 30, 47, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        margin-bottom: 20px;
-        overflow: hidden;
-        border: 1px solid rgba(99, 102, 241, 0.1);
-    }
-    
-    .playfab-card-header {
-        padding: 15px 20px;
-        background: rgba(0, 0, 0, 0.2);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        font-weight: 600;
-        font-size: 16px;
-        color: #fff;
-    }
-    
-    .playfab-card-body {
-        padding: 20px;
-    }
-    
-    /* 搜索栏 */
-    .playfab-search-bar {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        align-items: flex-end;
-    }
-    
-    .playfab-search-bar .playfab-form-group {
-        flex: 1;
-        min-width: 150px;
-    }
-    
-    .playfab-search-bar label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 12px;
-        color: #9ca3af;
-    }
-    
-    .playfab-search-bar select,
-    .playfab-search-bar input {
-        width: 100%;
-        padding: 10px;
-        background: #14141f;
-        border: 1px solid #2d2d44;
-        border-radius: 8px;
-        color: #fff;
-        font-size: 14px;
-    }
-    
-    .playfab-search-bar select:focus,
-    .playfab-search-bar input:focus {
-        outline: none;
-        border-color: #667eea;
-    }
-    
-    /* 按钮样式 */
-    .playfab-btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .playfab-btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-    }
-    
-    .playfab-btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-    
-    .playfab-btn-outline {
-        background: transparent;
-        border: 1px solid #2d2d44;
-        color: #fff;
-    }
-    
-    .playfab-btn-outline:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .playfab-btn-sm {
-        padding: 4px 12px;
-        font-size: 12px;
-    }
-    
-    .playfab-btn-danger {
-        background: #ef4444;
-        color: white;
-    }
-    
-    .playfab-btn-danger:hover {
-        background: #dc2626;
-    }
-    
-    .playfab-btn-success {
-        background: #10b981;
-        color: white;
-    }
-    
-    .playfab-btn-success:hover {
-        background: #059669;
-    }
-    
-    .playfab-btn-warning {
-        background: #f59e0b;
-        color: white;
-    }
-    
-    .playfab-btn-warning:hover {
-        background: #d97706;
-    }
-    
-    /* 高级筛选面板 */
-    .playfab-advanced-panel {
-        margin-top: 15px;
-        padding: 15px;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
-        display: none;
-    }
-    
-    .playfab-advanced-panel.show {
-        display: block;
-    }
-    
-    .playfab-filter-row {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-    
-    .playfab-filter-group {
-        flex: 1;
-        min-width: 120px;
-    }
-    
-    .playfab-filter-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 12px;
-        color: #9ca3af;
-    }
-    
-    .playfab-filter-group input,
-    .playfab-filter-group select {
-        width: 100%;
-        padding: 8px;
-        background: #14141f;
-        border: 1px solid #2d2d44;
-        border-radius: 8px;
-        color: #fff;
-    }
-    
-    .playfab-filter-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-        justify-content: flex-end;
-    }
-    
-    /* 徽章 */
-    .playfab-badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 500;
-    }
-    
-    .playfab-badge-banned {
-        background: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-    }
-    
-    .playfab-badge-normal {
-        background: rgba(16, 185, 129, 0.2);
-        color: #34d399;
-    }
-    
-    /* 表格 */
-    .playfab-table-wrapper {
-        overflow-x: auto;
-        margin-top: 15px;
-    }
-    
-    .playfab-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-    }
-    
-    .playfab-table th,
-    .playfab-table td {
-        padding: 12px 10px;
-        text-align: left;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .playfab-table th {
-        background: rgba(0, 0, 0, 0.3);
-        font-weight: 600;
-        color: #9ca3af;
-    }
-    
-    .playfab-table tr:hover {
-        background: rgba(255, 255, 255, 0.03);
-    }
-    
-    /* 空状态 */
-    .playfab-empty-state {
-        text-align: center;
-        padding: 40px;
-        color: #9ca3af;
-    }
-    
-    /* 弹性布局 */
-    .playfab-flex {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-    
-    /* 代码样式 */
-    code {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 12px;
-    }
-    
-    /* 加载中动画 */
-    .playfab-loading {
-        text-align: center;
-        padding: 20px;
-        color: #9ca3af;
-    }
-    
-    /* 响应式 */
-    @media (max-width: 768px) {
-        .playfab-search-bar {
-            flex-direction: column;
+    <!-- 更新封禁弹窗 -->
+    <div id="playfabUpdateBanModal" class="modal">
+        <div class="modal-content">
+            <h3>更新封禁信息</h3>
+            <div class="form-group">
+                <label>新原因</label>
+                <input type="text" id="updateBanReason" placeholder="请输入新的冻结原因">
+            </div>
+            <div class="form-group">
+                <label>新时长（小时，0表示永久）</label>
+                <input type="number" id="updateBanDuration" value="0">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-outline" id="closeUpdateBanModalBtn">取消</button>
+                <button class="btn btn-primary" id="confirmUpdateBanBtn">确认更新</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出弹窗 -->
+    <div id="playfabExportModal" class="modal">
+        <div class="modal-content">
+            <h3>导出玩家数据</h3>
+            <p>共 <span id="exportCount">0</span> 个玩家</p>
+            <div class="form-group" style="margin-top:15px;">
+                <label>导出格式</label>
+                <div style="display: flex; gap: 15px;">
+                    <label><input type="radio" name="exportFormat" value="csv" checked> CSV</label>
+                    <label><input type="radio" name="exportFormat" value="json"> JSON</label>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:15px;">
+                <label><input type="checkbox" id="exportIncludeLinked"> 包含关联平台账号</label>
+            </div>
+            <div style="margin-top:15px;">
+                <label>选择导出字段</label>
+                <div class="export-fields">
+                    <label><input type="checkbox" id="exportFieldId" checked> PlayFab ID</label>
+                    <label><input type="checkbox" id="exportFieldUsername" checked> 用户名</label>
+                    <label><input type="checkbox" id="exportFieldDisplayName" checked> 显示名</label>
+                    <label><input type="checkbox" id="exportFieldEmail" checked> 邮箱</label>
+                    <label><input type="checkbox" id="exportFieldDiamond" checked> 钻石</label>
+                    <label><input type="checkbox" id="exportFieldCreated" checked> 创建时间</label>
+                    <label><input type="checkbox" id="exportFieldLastLogin" checked> 最后登录</label>
+                    <label><input type="checkbox" id="exportFieldBanned" checked> 封禁状态</label>
+                    <label><input type="checkbox" id="exportFieldBanReason" checked> 封禁原因</label>
+                </div>
+            </div>
+            <div class="modal-buttons" style="margin-top:20px;">
+                <button class="btn btn-outline" id="closeExportModalBtn">取消</button>
+                <button class="btn btn-primary" id="confirmExportBtn">确认导出</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全局变量 ====================
+        let currentPlayFabPlayers = [];
+        let currentPlayFabSearchKeyword = '';
+        let currentPlayFabSearchType = 'username';
+        let currentBanPlayerId = null;
+        let currentUpdateBanId = null;
+        let segmentsList = [];
+        let showAdvancedSearch = false;
+        
+        // 从 URL 获取配置
+        function getUrlParams() {
+            const params = {};
+            const queryString = window.location.search;
+            if (queryString) {
+                const pairs = queryString.substring(1).split('&');
+                for (let i = 0; i < pairs.length; i++) {
+                    const pair = pairs[i].split('=');
+                    params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+                }
+            }
+            return params;
         }
         
-        .playfab-search-bar .playfab-form-group {
-            width: 100%;
+        const urlParams = getUrlParams();
+        const TITLE_ID = urlParams.titleId || urlParams.titleid;
+        const SECRET_KEY = urlParams.secretKey || urlParams.secretkey;
+        
+        // ==================== PlayFab API 调用 ====================
+        async function callPlayFabAdminApi(endpoint, body) {
+            const url = `https://${TITLE_ID}.playfabapi.com/Admin/${endpoint}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-SecretKey': SECRET_KEY
+                },
+                body: JSON.stringify(body)
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (result.code !== 200) throw new Error(result.errorMessage || result.message);
+            return result.data;
         }
         
-        .playfab-filter-row {
-            flex-direction: column;
+        async function searchPlayerByPlayFabId(playFabId) {
+            try {
+                const profile = await callPlayFabAdminApi('GetPlayerProfile', {
+                    PlayFabId: playFabId,
+                    ProfileConstraints: { ShowDisplayName: true, ShowEmail: true, ShowCreated: true, ShowLastLogin: true }
+                });
+                if (!profile.PlayerProfile) return null;
+                let diamondBalance = 0;
+                try {
+                    const inventory = await callPlayFabAdminApi('GetUserInventory', { PlayFabId: playFabId });
+                    if (inventory.VirtualCurrency?.DI) diamondBalance = inventory.VirtualCurrency.DI;
+                } catch (err) {}
+                let isBanned = false, banReason = null, banExpires = null, banId = null;
+                try {
+                    const bans = await callPlayFabAdminApi('GetUserBans', { PlayFabId: playFabId });
+                    const activeBan = bans.BanData?.find(ban => ban.Active === true);
+                    if (activeBan) {
+                        isBanned = true;
+                        banReason = activeBan.Reason;
+                        banExpires = activeBan.Expires;
+                        banId = activeBan.BanId;
+                    }
+                } catch (err) {}
+                return {
+                    playFabId: profile.PlayerProfile.PlayerId,
+                    displayName: profile.PlayerProfile.DisplayName || '',
+                    email: profile.PlayerProfile.Email || '',
+                    createdTime: profile.PlayerProfile.Created,
+                    lastLoginTime: profile.PlayerProfile.LastLogin,
+                    diamondBalance: diamondBalance,
+                    isBanned, banReason, banExpires, banId
+                };
+            } catch (err) { return null; }
         }
         
-        .playfab-filter-group {
-            width: 100%;
+        async function searchPlayerByDisplayName(displayName) {
+            try {
+                const result = await callPlayFabAdminApi('GetUserAccountInfo', { TitleDisplayName: displayName });
+                const userInfo = result?.UserInfo || result?.AccountInfo;
+                if (userInfo?.PlayFabId) return await searchPlayerByPlayFabId(userInfo.PlayFabId);
+                return null;
+            } catch (err) { return null; }
         }
-    }
-</style>
+        
+        async function banPlayerAction(playFabId, reason, durationHours, ipAddress) {
+            const banData = { PlayFabId: playFabId, Reason: reason || '违规操作', Permanent: durationHours === 0 };
+            if (durationHours > 0) banData.DurationInHours = durationHours;
+            if (ipAddress && ipAddress.trim()) banData.IPAddress = ipAddress.trim();
+            return await callPlayFabAdminApi('BanUsers', { Bans: [banData] });
+        }
+        
+        async function unbanPlayerAction(playFabId) {
+            try {
+                return await callPlayFabAdminApi('RevokeAllBansForUser', { PlayFabId: playFabId });
+            } catch (err) {
+                const bans = await callPlayFabAdminApi('GetUserBans', { PlayFabId: playFabId });
+                const activeBanIds = bans.BanData?.filter(ban => ban.Active === true).map(ban => ban.BanId) || [];
+                if (activeBanIds.length === 0) throw new Error('未找到活跃的封禁记录');
+                return await callPlayFabAdminApi('RevokeBans', { BanIds: activeBanIds });
+            }
+        }
+        
+        async function updateBanInfoAction(banId, reason, durationHours) {
+            const banUpdate = { BanId: banId, Reason: reason };
+            if (durationHours === 0) banUpdate.Permanent = true;
+            else {
+                banUpdate.Permanent = false;
+                const expires = new Date();
+                expires.setHours(expires.getHours() + durationHours);
+                banUpdate.Expires = expires.toISOString();
+            }
+            return await callPlayFabAdminApi('UpdateBans', { Bans: [banUpdate] });
+        }
+        
+        async function getSegmentsList() {
+            try {
+                const result = await callPlayFabAdminApi('GetAllSegments', {});
+                return result.Segments || [];
+            } catch (err) { return []; }
+        }
+        
+        // ==================== UI 函数 ====================
+        function toast(msg, isError) {
+            alert(msg);
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        
+        function renderSegmentsList(segments) {
+            const select = document.getElementById('filterSegmentId');
+            if (!select) return;
+            let html = '<option value="">不限</option>';
+            for (let i = 0; i < segments.length; i++) {
+                html += `<option value="${segments[i].Id}">${escapeHtml(segments[i].Name)} (${segments[i].Id.substring(0, 8)}...)</option>`;
+            }
+            select.innerHTML = html;
+        }
+        
+        async function loadSegmentsList() {
+            segmentsList = await getSegmentsList();
+            renderSegmentsList(segmentsList);
+        }
+        
+        function refreshSegments() {
+            loadSegmentsList();
+            toast('分段列表已刷新', false);
+        }
+        
+        // ==================== 搜索功能 ====================
+        async function searchPlayFabPlayer() {
+            const keyword = document.getElementById('playfabSearchKeyword').value.trim();
+            const searchType = document.getElementById('playfabSearchType').value;
+            if (!keyword) { toast('请输入搜索关键词', true); return; }
+            currentPlayFabSearchKeyword = keyword;
+            currentPlayFabSearchType = searchType;
+            toast('搜索中...', false);
+            try {
+                let player = null;
+                if (searchType === 'playFabId') player = await searchPlayerByPlayFabId(keyword);
+                else player = await searchPlayerByDisplayName(keyword);
+                const players = player ? [player] : [];
+                currentPlayFabPlayers = players;
+                renderPlayFabPlayers(players);
+                if (players.length === 0) toast(`未找到 ${searchType === 'playFabId' ? 'PlayFab ID' : '显示名称'} 为 "${keyword}" 的玩家`, true);
+                else toast('搜索成功', false);
+            } catch (err) { toast('搜索失败: ' + err.message, true); currentPlayFabPlayers = []; renderPlayFabPlayers([]); }
+        }
+        
+        // ==================== 高级搜索 ====================
+        function toggleAdvancedSearch() {
+            const panel = document.getElementById('advancedSearchPanel');
+            if (panel) {
+                showAdvancedSearch = !showAdvancedSearch;
+                panel.style.display = showAdvancedSearch ? 'block' : 'none';
+            }
+        }
+        
+        function resetAdvancedSearch() {
+            document.getElementById('filterLastLoginDays').value = '';
+            document.getElementById('filterNotLoginDays').value = '';
+            document.getElementById('filterMinDiamond').value = '';
+            document.getElementById('filterMaxDiamond').value = '';
+            document.getElementById('filterBannedStatus').value = '';
+            document.getElementById('filterSegmentId').value = '';
+            toast('筛选条件已重置', false);
+        }
+        
+        async function advancedSearch() {
+            const lastLoginDays = document.getElementById('filterLastLoginDays').value;
+            const notLoginDays = document.getElementById('filterNotLoginDays').value;
+            const minDiamond = document.getElementById('filterMinDiamond').value;
+            const maxDiamond = document.getElementById('filterMaxDiamond').value;
+            const bannedStatus = document.getElementById('filterBannedStatus').value;
+            const segmentId = document.getElementById('filterSegmentId').value;
+            const requestBody = {};
+            if (lastLoginDays && lastLoginDays !== '') requestBody.lastLoginDays = parseInt(lastLoginDays);
+            if (notLoginDays && notLoginDays !== '') requestBody.notLoginDays = parseInt(notLoginDays);
+            if (minDiamond && minDiamond !== '') requestBody.minDiamond = parseInt(minDiamond);
+            if (maxDiamond && maxDiamond !== '') requestBody.maxDiamond = parseInt(maxDiamond);
+            if (bannedStatus && bannedStatus !== '') requestBody.isBanned = bannedStatus === 'true';
+            if (segmentId && segmentId !== '') requestBody.segmentId = segmentId;
+            if (Object.keys(requestBody).length === 0) { toast('请至少选择一个筛选条件', true); return; }
+            toast('高级搜索功能需要后端支持', true);
+        }
+        
+        // ==================== 封禁相关 ====================
+        function showBanModal(playFabId) {
+            currentBanPlayerId = playFabId;
+            const modal = document.getElementById('playfabBanModal');
+            if (modal) modal.style.display = 'flex';
+            document.getElementById('banReason').value = '';
+            document.getElementById('banDuration').value = '0';
+            document.getElementById('banIpAddress').value = '';
+        }
+        
+        function closeBanModal() {
+            const modal = document.getElementById('playfabBanModal');
+            if (modal) modal.style.display = 'none';
+            currentBanPlayerId = null;
+        }
+        
+        async function confirmBan() {
+            const reason = document.getElementById('banReason').value;
+            const duration = parseInt(document.getElementById('banDuration').value);
+            const ipAddress = document.getElementById('banIpAddress').value;
+            if (!reason) { toast('请输入冻结原因', true); return; }
+            try {
+                await banPlayerAction(currentBanPlayerId, reason, duration, ipAddress);
+                toast('冻结成功', false);
+                closeBanModal();
+                if (currentPlayFabSearchKeyword) await searchPlayFabPlayer();
+            } catch (err) { toast('冻结失败: ' + err.message, true); }
+        }
+        
+        function showUpdateBanModal(banId, currentReason, currentDurationHours) {
+            currentUpdateBanId = banId;
+            const modal = document.getElementById('playfabUpdateBanModal');
+            if (modal) modal.style.display = 'flex';
+            document.getElementById('updateBanReason').value = currentReason || '';
+            document.getElementById('updateBanDuration').value = currentDurationHours || 0;
+        }
+        
+        function closeUpdateBanModal() {
+            const modal = document.getElementById('playfabUpdateBanModal');
+            if (modal) modal.style.display = 'none';
+            currentUpdateBanId = null;
+        }
+        
+        async function confirmUpdateBan() {
+            const reason = document.getElementById('updateBanReason').value;
+            const duration = parseInt(document.getElementById('updateBanDuration').value);
+            if (!reason) { toast('请输入冻结原因', true); return; }
+            try {
+                await updateBanInfoAction(currentUpdateBanId, reason, duration);
+                toast('更新成功', false);
+                closeUpdateBanModal();
+                if (currentPlayFabSearchKeyword) await searchPlayFabPlayer();
+            } catch (err) { toast('更新失败: ' + err.message, true); }
+        }
+        
+        async function unbanPlayFabPlayer(playFabId) {
+            if (!confirm('确定要解冻该玩家吗？')) return;
+            try {
+                await unbanPlayerAction(playFabId);
+                toast('解冻成功', false);
+                if (currentPlayFabSearchKeyword) await searchPlayFabPlayer();
+            } catch (err) { toast('解冻失败: ' + err.message, true); }
+        }
+        
+        // ==================== 渲染表格 ====================
+        function renderPlayFabPlayers(players) {
+            const container = document.getElementById('playfabPlayersList');
+            if (!container) return;
+            if (!players || players.length === 0) { container.innerHTML = '<div class="empty-state">暂无玩家数据</div>'; return; }
+            let html = '<div class="batch-bar">';
+            html += '<button class="btn btn-success btn-sm" onclick="exportLinkedAccounts()">📤 导出选中关联平台</button>';
+            html += '<button class="btn btn-danger btn-sm" onclick="batchDeleteSelected()">🗑️ 删除选中</button>';
+            html += '<span style="flex:1"></span>';
+            html += '<button class="btn btn-outline btn-sm" onclick="showExportModal()">📥 导出全部</button>';
+            html += '</div><div class="table-wrapper"><table><thead><tr>';
+            html += '<th style="width:30px;"><input type="checkbox" id="selectAllPlayers" onclick="toggleSelectAll()"></th>';
+            html += '<th>PlayFab ID</th><th>显示名</th><th>钻石</th><th>设备数</th><th>状态</th><th>冻结原因</th><th>冻结到期</th><th>操作</th>';
+            html += '</tr></thead><tbody>';
+            for (let i = 0; i < players.length; i++) {
+                const p = players[i];
+                const isBanned = p.isBanned;
+                let banExpiresText = '-';
+                if (isBanned && p.banExpires) banExpiresText = new Date(p.banExpires).toLocaleString();
+                else if (isBanned) banExpiresText = '永久';
+                let remainingHours = 0;
+                if (isBanned && p.banExpires && p.banExpires !== '永久') {
+                    remainingHours = Math.max(0, Math.ceil((new Date(p.banExpires) - new Date()) / (1000 * 60 * 60)));
+                }
+                html += `<tr>`;
+                html += `<td><input type="checkbox" class="player-select" data-id="${p.playFabId}"></td>`;
+                html += `<td><code>${escapeHtml(p.playFabId)}</code></td>`;
+                html += `<td>${escapeHtml(p.displayName || '-')}</td>`;
+                html += `<td>💎 ${p.diamondBalance || 0}</td>`;
+                html += `<td>📱 0</td>`;
+                html += `<td><span class="badge ${isBanned ? 'badge-rejected' : 'badge-approved'}">${isBanned ? '已冻结' : '正常'}</span></td>`;
+                html += `<td>${isBanned ? escapeHtml(p.banReason || '未提供') : '-'}</td>`;
+                html += `<td>${banExpiresText}</td>`;
+                html += `<td><div class="flex" style="gap:5px;">`;
+                html += `<button class="btn btn-primary btn-view-detail" data-playfab-id="${p.playFabId}" style="padding:4px 12px;">详情</button>`;
+                if (isBanned) {
+                    if (p.banId) html += `<button class="btn btn-warning btn-update-ban" data-ban-id="${p.banId}" data-ban-reason="${escapeHtml(p.banReason || '')}" data-ban-hours="${remainingHours}" style="padding:4px 12px;">更新</button>`;
+                    html += `<button class="btn btn-success btn-unban" data-playfab-id="${p.playFabId}" style="padding:4px 12px;">解冻</button>`;
+                } else {
+                    html += `<button class="btn btn-danger btn-ban" data-playfab-id="${p.playFabId}" style="padding:4px 12px;">冻结</button>`;
+                }
+                html += `</div></td></tr>`;
+            }
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+            // 绑定事件
+            document.querySelectorAll('.btn-view-detail').forEach(btn => { btn.onclick = () => viewPlayFabPlayerDetail(btn.getAttribute('data-playfab-id')); });
+            document.querySelectorAll('.btn-ban').forEach(btn => { btn.onclick = () => showBanModal(btn.getAttribute('data-playfab-id')); });
+            document.querySelectorAll('.btn-unban').forEach(btn => { btn.onclick = () => unbanPlayFabPlayer(btn.getAttribute('data-playfab-id')); });
+            document.querySelectorAll('.btn-update-ban').forEach(btn => {
+                const banId = btn.getAttribute('data-ban-id');
+                const reason = btn.getAttribute('data-ban-reason');
+                const hours = parseInt(btn.getAttribute('data-ban-hours')) || 0;
+                btn.onclick = () => showUpdateBanModal(banId, reason, hours);
+            });
+        }
+        
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAllPlayers');
+            const checkboxes = document.querySelectorAll('#playfabPlayersList .player-select');
+            for (let i = 0; i < checkboxes.length; i++) checkboxes[i].checked = selectAll.checked;
+        }
+        
+        // ==================== 导出功能 ====================
+        function showExportModal() {
+            const modal = document.getElementById('playfabExportModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                const countSpan = document.getElementById('exportCount');
+                if (countSpan) countSpan.innerText = currentPlayFabPlayers.length;
+            }
+        }
+        
+        function closeExportModal() {
+            const modal = document.getElementById('playfabExportModal');
+            if (modal) modal.style.display = 'none';
+        }
+        
+        function doExport() {
+            toast('导出功能需要后端支持', true);
+        }
+        
+        function exportLinkedAccounts() {
+            toast('导出关联平台需要后端支持', true);
+        }
+        
+        function batchDeleteSelected() {
+            toast('批量删除需要后端支持', true);
+        }
+        
+        function viewPlayFabPlayerDetail(playFabId) {
+            window.open(`./playfab-detail.html?playFabId=${playFabId}&titleId=${TITLE_ID}&secretKey=${encodeURIComponent(SECRET_KEY)}`, '_blank');
+        }
+        
+        function loadBannedPlayers() {
+            toast('冻结列表功能需要后端支持', true);
+            renderPlayFabPlayers([]);
+        }
+        
+        // ==================== 初始化 ====================
+        function init() {
+            if (!TITLE_ID || !SECRET_KEY) {
+                document.getElementById('playfabPlayersList').innerHTML = '<div class="empty-state">❌ 配置错误<br>缺少 titleId 或 secretKey 参数</div>';
+                return;
+            }
+            loadSegmentsList();
+            // 绑定事件
+            document.getElementById('searchBtn').onclick = searchPlayFabPlayer;
+            document.getElementById('advancedSearchBtn').onclick = toggleAdvancedSearch;
+            document.getElementById('advancedSearchDoBtn').onclick = advancedSearch;
+            document.getElementById('resetAdvancedSearchBtn').onclick = resetAdvancedSearch;
+            document.getElementById('showBannedBtn').onclick = loadBannedPlayers;
+            document.getElementById('refreshSegmentsBtn').onclick = refreshSegments;
+            document.getElementById('confirmBanBtn').onclick = confirmBan;
+            document.getElementById('confirmUpdateBanBtn').onclick = confirmUpdateBan;
+            document.getElementById('confirmExportBtn').onclick = doExport;
+            document.getElementById('closeBanModalBtn').onclick = closeBanModal;
+            document.getElementById('closeUpdateBanModalBtn').onclick = closeUpdateBanModal;
+            document.getElementById('closeExportModalBtn').onclick = closeExportModal;
+            document.getElementById('playfabSearchKeyword').onkeypress = function(e) { if (e.key === 'Enter') searchPlayFabPlayer(); };
+            // 全局函数
+            window.closeBanModal = closeBanModal;
+            window.closeUpdateBanModal = closeUpdateBanModal;
+            window.closeExportModal = closeExportModal;
+            window.showBanModal = showBanModal;
+            window.showUpdateBanModal = showUpdateBanModal;
+            window.showExportModal = showExportModal;
+            window.confirmBan = confirmBan;
+            window.confirmUpdateBan = confirmUpdateBan;
+            window.doExport = doExport;
+            window.unbanPlayFabPlayer = unbanPlayFabPlayer;
+            window.viewPlayFabPlayerDetail = viewPlayFabPlayerDetail;
+            window.searchPlayFabPlayer = searchPlayFabPlayer;
+            window.loadBannedPlayers = loadBannedPlayers;
+            window.advancedSearch = advancedSearch;
+            window.toggleAdvancedSearch = toggleAdvancedSearch;
+            window.resetAdvancedSearch = resetAdvancedSearch;
+            window.exportLinkedAccounts = exportLinkedAccounts;
+            window.batchDeleteSelected = batchDeleteSelected;
+            window.toggleSelectAll = toggleSelectAll;
+            window.refreshSegments = refreshSegments;
+        }
+        
+        init();
+    </script>
+</body>
+</html>
