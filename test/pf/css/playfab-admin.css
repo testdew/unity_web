@@ -1,4 +1,4 @@
-/* PlayFab 管理样式 - 完整版 */
+/* PlayFab 管理样式 - 恢复原始外观 */
 
 * {
     margin: 0;
@@ -10,17 +10,20 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #1a1a2e;
     color: #fff;
-    padding: 20px;
+    height: 100vh;
+    overflow: auto;
 }
 
-/* 卡片样式 */
+/* 卡片样式 - 恢复原始 */
 .card {
     background: rgba(30, 30, 47, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 12px;
-    margin-bottom: 20px;
     overflow: hidden;
     border: 1px solid rgba(99, 102, 241, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .card-header {
@@ -29,6 +32,7 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: 600;
     font-size: 16px;
+    flex-shrink: 0;
 }
 
 .card-header h3 {
@@ -38,6 +42,9 @@ body {
 
 .card-body {
     padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 /* 搜索栏 */
@@ -47,6 +54,7 @@ body {
     margin-bottom: 20px;
     flex-wrap: wrap;
     align-items: flex-end;
+    flex-shrink: 0;
 }
 
 .form-group {
@@ -148,6 +156,7 @@ body {
     padding: 15px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
+    flex-shrink: 0;
 }
 
 .advanced-panel.show {
@@ -199,11 +208,15 @@ body {
     gap: 10px;
     flex-wrap: wrap;
     align-items: center;
+    flex-shrink: 0;
 }
 
-/* 表格 */
+/* 表格容器 - 可滚动 */
 .table-wrapper {
     overflow-x: auto;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 table {
@@ -222,6 +235,9 @@ th {
     background: rgba(0, 0, 0, 0.3);
     font-weight: 600;
     color: #9ca3af;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 tr:hover {

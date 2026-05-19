@@ -2,10 +2,28 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height">
     <title>PlayFab 玩家管理</title>
-    <link rel="stylesheet" href="./css/playfab-admin.css">
- </head>
+    <link rel="stylesheet" href="/css/playfab-admin.css">
+    <style>
+        /* 确保 body 和 html 占满全屏，滚动条在最外层 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            overflow-y: auto;
+            padding: 20px;
+        }
+        /* 卡片占满剩余空间 */
+        .card {
+            min-height: calc(100vh - 40px);
+        }
+    </style>
+</head>
 <body>
     <div class="card">
         <div class="card-header"><h3>🎮 PlayFab 玩家管理</h3></div>
@@ -344,7 +362,7 @@
             const panel = document.getElementById('advancedSearchPanel');
             if (panel) {
                 showAdvancedSearch = !showAdvancedSearch;
-                panel.style.display = showAdvancedSearch ? 'block' : 'none';
+                panel.classList.toggle('show', showAdvancedSearch);
             }
         }
         
@@ -359,20 +377,6 @@
         }
         
         async function advancedSearch() {
-            const lastLoginDays = document.getElementById('filterLastLoginDays').value;
-            const notLoginDays = document.getElementById('filterNotLoginDays').value;
-            const minDiamond = document.getElementById('filterMinDiamond').value;
-            const maxDiamond = document.getElementById('filterMaxDiamond').value;
-            const bannedStatus = document.getElementById('filterBannedStatus').value;
-            const segmentId = document.getElementById('filterSegmentId').value;
-            const requestBody = {};
-            if (lastLoginDays && lastLoginDays !== '') requestBody.lastLoginDays = parseInt(lastLoginDays);
-            if (notLoginDays && notLoginDays !== '') requestBody.notLoginDays = parseInt(notLoginDays);
-            if (minDiamond && minDiamond !== '') requestBody.minDiamond = parseInt(minDiamond);
-            if (maxDiamond && maxDiamond !== '') requestBody.maxDiamond = parseInt(maxDiamond);
-            if (bannedStatus && bannedStatus !== '') requestBody.isBanned = bannedStatus === 'true';
-            if (segmentId && segmentId !== '') requestBody.segmentId = segmentId;
-            if (Object.keys(requestBody).length === 0) { toast('请至少选择一个筛选条件', true); return; }
             toast('高级搜索功能需要后端支持', true);
         }
         
@@ -380,7 +384,7 @@
         function showBanModal(playFabId) {
             currentBanPlayerId = playFabId;
             const modal = document.getElementById('playfabBanModal');
-            if (modal) modal.style.display = 'flex';
+            if (modal) modal.classList.add('show');
             document.getElementById('banReason').value = '';
             document.getElementById('banDuration').value = '0';
             document.getElementById('banIpAddress').value = '';
@@ -388,7 +392,7 @@
         
         function closeBanModal() {
             const modal = document.getElementById('playfabBanModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) modal.classList.remove('show');
             currentBanPlayerId = null;
         }
         
@@ -408,14 +412,14 @@
         function showUpdateBanModal(banId, currentReason, currentDurationHours) {
             currentUpdateBanId = banId;
             const modal = document.getElementById('playfabUpdateBanModal');
-            if (modal) modal.style.display = 'flex';
+            if (modal) modal.classList.add('show');
             document.getElementById('updateBanReason').value = currentReason || '';
             document.getElementById('updateBanDuration').value = currentDurationHours || 0;
         }
         
         function closeUpdateBanModal() {
             const modal = document.getElementById('playfabUpdateBanModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) modal.classList.remove('show');
             currentUpdateBanId = null;
         }
         
@@ -469,19 +473,20 @@
                 html += `<td><code>${escapeHtml(p.playFabId)}</code></td>`;
                 html += `<td>${escapeHtml(p.displayName || '-')}</td>`;
                 html += `<td>💎 ${p.diamondBalance || 0}</td>`;
-                html += `<td>📱 0</td>`;
+                html += `<td>📱 0</div>`;
                 html += `<td><span class="badge ${isBanned ? 'badge-rejected' : 'badge-approved'}">${isBanned ? '已冻结' : '正常'}</span></td>`;
                 html += `<td>${isBanned ? escapeHtml(p.banReason || '未提供') : '-'}</td>`;
                 html += `<td>${banExpiresText}</td>`;
                 html += `<td><div class="flex" style="gap:5px;">`;
-                html += `<button class="btn btn-primary btn-view-detail" data-playfab-id="${p.playFabId}" style="padding:4px 12px;">详情</button>`;
+                html += `<button class="btn btn-primary btn-sm btn-view-detail" data-playfab-id="${p.playFabId}">详情</button>`;
                 if (isBanned) {
-                    if (p.banId) html += `<button class="btn btn-warning btn-update-ban" data-ban-id="${p.banId}" data-ban-reason="${escapeHtml(p.banReason || '')}" data-ban-hours="${remainingHours}" style="padding:4px 12px;">更新</button>`;
-                    html += `<button class="btn btn-success btn-unban" data-playfab-id="${p.playFabId}" style="padding:4px 12px;">解冻</button>`;
+                    if (p.banId) html += `<button class="btn btn-warning btn-sm btn-update-ban" data-ban-id="${p.banId}" data-ban-reason="${escapeHtml(p.banReason || '')}" data-ban-hours="${remainingHours}">更新</button>`;
+                    html += `<button class="btn btn-success btn-sm btn-unban" data-playfab-id="${p.playFabId}">解冻</button>`;
                 } else {
-                    html += `<button class="btn btn-danger btn-ban" data-playfab-id="${p.playFabId}" style="padding:4px 12px;">冻结</button>`;
+                    html += `<button class="btn btn-danger btn-sm btn-ban" data-playfab-id="${p.playFabId}">冻结</button>`;
                 }
-                html += `</div></td></tr>`;
+                html += `</div></td>`;
+                html += '</tr>';
             }
             html += '</tbody></table></div>';
             container.innerHTML = html;
@@ -507,7 +512,7 @@
         function showExportModal() {
             const modal = document.getElementById('playfabExportModal');
             if (modal) {
-                modal.style.display = 'flex';
+                modal.classList.add('show');
                 const countSpan = document.getElementById('exportCount');
                 if (countSpan) countSpan.innerText = currentPlayFabPlayers.length;
             }
@@ -515,7 +520,7 @@
         
         function closeExportModal() {
             const modal = document.getElementById('playfabExportModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) modal.classList.remove('show');
         }
         
         function doExport() {
