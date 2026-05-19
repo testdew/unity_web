@@ -24,50 +24,6 @@
             padding: 20px;
         }
         
-        .admin-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px 30px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .admin-header h1 {
-            font-size: 24px;
-        }
-        
-        .admin-header p {
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        
-        .config-info {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .config-info code {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
-        }
-        
-        .config-error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
         .playfab-toast {
             position: fixed;
             bottom: 20px;
@@ -158,17 +114,27 @@
             padding: 40px;
             color: #9ca3af;
         }
+        
+        /* 错误提示 */
+        .error-container {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px;
+        }
+        
+        .error-container code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
     <div class="admin-container">
-        <div class="admin-header">
-            <h1>🎮 PlayFab 管理后台</h1>
-            <p>玩家管理、封禁操作</p>
-        </div>
-        
-        <div id="configInfo" class="config-info"></div>
-        
         <div id="playfabContent">
             <div class="loading">加载中...</div>
         </div>
@@ -239,26 +205,16 @@
         const titleId = urlParams.titleId || urlParams.titleid;
         const secretKey = urlParams.secretKey || urlParams.secretkey;
         
-        const configDiv = document.getElementById('configInfo');
-        
         // 检查配置是否完整
         if (!titleId || !secretKey) {
-            configDiv.innerHTML = `
-                <div class="config-error">
+            document.getElementById('playfabContent').innerHTML = `
+                <div class="error-container">
                     <strong>❌ 配置错误</strong><br>
                     缺少必要的参数，请通过 URL 传入 titleId 和 secretKey<br><br>
                     示例: <code>admin.html?titleId=XXXX&secretKey=XXXX</code>
                 </div>
             `;
-            document.getElementById('playfabContent').innerHTML = '';
         } else {
-            // 显示配置信息
-            configDiv.innerHTML = `
-                <span>✅ PlayFab 配置已加载</span>
-                <span><code>Title ID: ${titleId.substring(0, 8)}...</code></span>
-                <span><code>Secret Key: ${secretKey.substring(0, 8)}...</code></span>
-            `;
-            
             // 加载 PlayFab 管理界面 HTML
             fetch('./playfab-admin.html')
                 .then(res => {
