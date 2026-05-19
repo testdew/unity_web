@@ -1,0 +1,264 @@
+<!-- PlayFab 管理界面模板 - 静态文件 -->
+<style>
+    /* PlayFab 管理样式 */
+    .playfab-search-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+    .playfab-search-bar .playfab-form-group {
+        flex: 1;
+        min-width: 150px;
+    }
+    .playfab-search-bar label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 12px;
+        color: #9ca3af;
+    }
+    .playfab-search-bar select,
+    .playfab-search-bar input {
+        width: 100%;
+        padding: 10px;
+        background: #14141f;
+        border: 1px solid #2d2d44;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+    }
+    .playfab-search-bar select:focus,
+    .playfab-search-bar input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .playfab-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .playfab-btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+    .playfab-btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .playfab-btn-outline {
+        background: transparent;
+        border: 1px solid #2d2d44;
+        color: #fff;
+    }
+    .playfab-btn-outline:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .playfab-btn-sm {
+        padding: 4px 12px;
+        font-size: 12px;
+    }
+    .playfab-btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+    .playfab-btn-danger:hover {
+        background: #dc2626;
+    }
+    .playfab-btn-success {
+        background: #10b981;
+        color: white;
+    }
+    .playfab-btn-success:hover {
+        background: #059669;
+    }
+    .playfab-btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+    .playfab-btn-warning:hover {
+        background: #d97706;
+    }
+    
+    .playfab-advanced-panel {
+        margin-top: 15px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        display: none;
+    }
+    .playfab-advanced-panel.show {
+        display: block;
+    }
+    .playfab-filter-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .playfab-filter-group {
+        flex: 1;
+        min-width: 120px;
+    }
+    .playfab-filter-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 12px;
+        color: #9ca3af;
+    }
+    .playfab-filter-group input,
+    .playfab-filter-group select {
+        width: 100%;
+        padding: 8px;
+        background: #14141f;
+        border: 1px solid #2d2d44;
+        border-radius: 8px;
+        color: #fff;
+    }
+    .playfab-filter-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: flex-end;
+    }
+    
+    .playfab-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    .playfab-badge-banned {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    .playfab-badge-normal {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    
+    .playfab-table-wrapper {
+        overflow-x: auto;
+        margin-top: 15px;
+    }
+    .playfab-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .playfab-table th,
+    .playfab-table td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .playfab-table th {
+        background: rgba(0, 0, 0, 0.3);
+        font-weight: 600;
+        color: #9ca3af;
+    }
+    .playfab-table tr:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .playfab-empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #9ca3af;
+    }
+    
+    .playfab-flex {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    code {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+    }
+    
+    @media (max-width: 768px) {
+        .playfab-search-bar {
+            flex-direction: column;
+        }
+        .playfab-search-bar .playfab-form-group {
+            width: 100%;
+        }
+        .playfab-filter-row {
+            flex-direction: column;
+        }
+        .playfab-filter-group {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="playfab-search-bar">
+    <div class="playfab-form-group">
+        <label>查找类型</label>
+        <select id="playfabSearchType">
+            <option value="username" selected>显示名称</option>
+            <option value="playFabId">PlayFab ID</option>
+        </select>
+    </div>
+    <div class="playfab-form-group" style="flex: 2;">
+        <label>关键词</label>
+        <input type="text" id="playfabSearchKeyword" placeholder="请输入显示名称或 PlayFab ID">
+    </div>
+    <button class="playfab-btn playfab-btn-primary" id="playfabSearchBtn">🔍 搜索</button>
+    <button class="playfab-btn playfab-btn-outline" id="playfabAdvancedBtn">⚙️ 高级筛选</button>
+</div>
+
+<div id="playfabAdvancedPanel" class="playfab-advanced-panel">
+    <div class="playfab-filter-row">
+        <div class="playfab-filter-group">
+            <label>最近登录(≤天数)</label>
+            <input type="number" id="playfabFilterLastLoginDays" placeholder="如: 7">
+        </div>
+        <div class="playfab-filter-group">
+            <label>未登录(≥天数)</label>
+            <input type="number" id="playfabFilterNotLoginDays" placeholder="如: 30">
+        </div>
+        <div class="playfab-filter-group">
+            <label>钻石(最小)</label>
+            <input type="number" id="playfabFilterMinDiamond" placeholder="0">
+        </div>
+        <div class="playfab-filter-group">
+            <label>钻石(最大)</label>
+            <input type="number" id="playfabFilterMaxDiamond" placeholder="10000">
+        </div>
+        <div class="playfab-filter-group">
+            <label>封禁状态</label>
+            <select id="playfabFilterBannedStatus">
+                <option value="">不限</option>
+                <option value="true">已封禁</option>
+                <option value="false">正常</option>
+            </select>
+        </div>
+        <div class="playfab-filter-group" style="flex: 2;">
+            <label>分段筛选</label>
+            <div style="display: flex; gap: 8px;">
+                <select id="playfabFilterSegmentId" style="flex: 1;">
+                    <option value="">加载中...</option>
+                </select>
+                <button class="playfab-btn playfab-btn-outline" id="playfabRefreshSegmentsBtn" style="padding:8px 12px;">🔄</button>
+            </div>
+        </div>
+    </div>
+    <div class="playfab-filter-actions">
+        <button class="playfab-btn playfab-btn-primary" id="playfabApplyFilterBtn">应用筛选</button>
+        <button class="playfab-btn playfab-btn-outline" id="playfabResetFilterBtn">重置</button>
+    </div>
+</div>
+
+<div id="playfabPlayersList" class="playfab-empty-state">请搜索玩家</div>

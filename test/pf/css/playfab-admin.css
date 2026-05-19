@@ -1,0 +1,329 @@
+/* PlayFab 管理样式 - 完整版 */
+:root {
+    --primary: #667eea;
+    --primary-dark: #5a67d8;
+    --danger: #f56565;
+    --danger-dark: #e53e3e;
+    --success: #48bb78;
+    --success-dark: #38a169;
+    --warning: #ed8936;
+    --gray: #718096;
+    --dark-bg: #1a1a2e;
+    --card-bg: #1e1e2f;
+    --border-color: #2d2d44;
+}
+
+/* 卡片样式 */
+.playfab-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.playfab-card-header {
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.playfab-card-body {
+    padding: 20px;
+}
+
+/* 搜索栏 */
+.playfab-search-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.playfab-search-bar .form-group {
+    flex: 1;
+    min-width: 150px;
+    margin-bottom: 0;
+}
+
+.playfab-search-bar label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.playfab-search-bar select,
+.playfab-search-bar input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #14141f;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.playfab-search-bar select:focus,
+.playfab-search-bar input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* 按钮样式 */
+.playfab-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.playfab-btn-primary {
+    background: linear-gradient(135deg, var(--primary), #764ba2);
+    color: white;
+}
+
+.playfab-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.playfab-btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.playfab-btn-danger:hover {
+    background: var(--danger-dark);
+}
+
+.playfab-btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.playfab-btn-success:hover {
+    background: var(--success-dark);
+}
+
+.playfab-btn-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.playfab-btn-warning:hover {
+    background: #dd6b20;
+}
+
+.playfab-btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: #fff;
+}
+
+.playfab-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+}
+
+.playfab-btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+}
+
+/* 高级筛选面板 */
+.playfab-advanced-panel {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: none;
+}
+
+.playfab-advanced-panel.show {
+    display: block;
+}
+
+.playfab-advanced-panel .form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.playfab-advanced-panel .form-group {
+    flex: 1;
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+.playfab-advanced-panel label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.playfab-advanced-panel input,
+.playfab-advanced-panel select {
+    width: 100%;
+    padding: 8px 10px;
+    background: #14141f;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+}
+
+/* 批量操作栏 */
+.playfab-batch-bar {
+    margin-bottom: 15px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* 表格样式 */
+.playfab-table-wrapper {
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
+.playfab-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.playfab-table th,
+.playfab-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.playfab-table th {
+    background: rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+    color: #9ca3af;
+}
+
+.playfab-table tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* 徽章 */
+.playfab-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.playfab-badge-banned {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+.playfab-badge-normal {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+/* Flex 工具类 */
+.playfab-flex {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* 复选框样式 */
+.playfab-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+/* 代码样式 */
+.playfab-table code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+/* 空状态 */
+.playfab-empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #9ca3af;
+}
+
+/* 进度条 */
+.playfab-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--border-color);
+    z-index: 1000;
+    display: none;
+}
+
+.playfab-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #764ba2);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .playfab-search-bar {
+        flex-direction: column;
+    }
+    
+    .playfab-search-bar .form-group {
+        width: 100%;
+    }
+    
+    .playfab-advanced-panel .form-row {
+        flex-direction: column;
+    }
+    
+    .playfab-advanced-panel .form-group {
+        width: 100%;
+    }
+    
+    .playfab-batch-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .playfab-table th,
+    .playfab-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+}
