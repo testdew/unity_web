@@ -641,6 +641,41 @@
 		
 		return result;
 	}
+	
+	
+	// 更新玩家数据
+	async function updateUserData(playFabId, data) {
+		if (!PlayFabSettings.secretKey) {
+			throw new Error('Admin API 需要配置 secretKey');
+		}
+		
+		var updateData = {};
+		for (var key in data) {
+			if (data.hasOwnProperty(key)) {
+				updateData[key] = { Value: data[key] };
+			}
+		}
+		
+		var result = await callPlayFabAdminApi('UpdateUserData', {
+			PlayFabId: playFabId,
+			Data: updateData
+		});
+		return result;
+	}
+
+	// 删除玩家数据
+	async function deleteUserData(playFabId, keys) {
+		if (!PlayFabSettings.secretKey) {
+			throw new Error('Admin API 需要配置 secretKey');
+		}
+		
+		var result = await callPlayFabAdminApi('UpdateUserData', {
+			PlayFabId: playFabId,
+			KeysToRemove: keys
+		});
+		return result;
+	}
+	
     /**
      * PlayFab 客户端注册
      */
@@ -700,6 +735,10 @@
         unbanPlayer,
         updateBanInfo,
         getPlayerBanInfo,
+		
+		
+		updateUserData,
+		deleteUserData,
 		
 		getAccountsFromSegment,
         
