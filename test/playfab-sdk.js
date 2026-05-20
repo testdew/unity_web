@@ -676,6 +676,38 @@
 		return result;
 	}
 	
+	// 更新玩家数据（带权限）
+	async function updateUserDataWithPermission(playFabId, data) {
+		if (!PlayFabSettings.secretKey) {
+			throw new Error('Admin API 需要配置 secretKey');
+		}
+		
+		var updateData = {};
+		var keysToRemove = [];
+		
+		for (var key in data) {
+			if (data.hasOwnProperty(key)) {
+				if (data[key].Value !== undefined) {
+					updateData[key] = { 
+						Value: data[key].Value,
+						Permission: data[key].Permission || 'Public'
+					};
+				} else if (data[key] === null) {
+					keysToRemove.push(key);
+				}
+			}
+		}
+		
+		var result = await callPlayFabAdminApi('UpdateUserData', {
+			PlayFabId: playFabId,
+			Data: updateData,
+			KeysToRemove: keysToRemove
+		});
+		return result;
+	}
+
+	
+	
     /**
      * PlayFab 客户端注册
      */
@@ -739,7 +771,7 @@
 		
 		updateUserData,
 		deleteUserData,
-		
+		updateUserDataWithPermission,
 		getAccountsFromSegment,
         
         // 玩家搜索
