@@ -496,6 +496,120 @@
             return { success: false, error: err.message };
         }
     }
+	
+	/**
+ * 从分段获取玩家账号列表
+ */
+	async function getAccountsFromSegment(segmentId) {
+		if (!PlayFabSettings.secretKey) {
+			throw new Error('Admin API 需要配置 secretKey');
+		}
+		
+		try {
+			const exportResult = await callPlayFabAdminApi('ExportPlayersInSegment', {
+				SegmentId: segmentId,
+				SegmentNameOverride: 'Export_' + Date.now()
+			});
+			
+			const exportId = exportResult.ExportId;
+			let downloadUrl = null;
+			let attempts = 0;
+			
+			while (!downloadUrl && attempts < 30) {
+				await new Promise(r => setTimeout(r, 3000));
+				attempts++;
+				const statusResult = await callPlayFabAdminApi('GetSegmentExport', {
+					ExportId: exportId
+				});
+				if (statusResult.IndexUrl) {
+					downloadUrl = statusResult.IndexUrl;
+				}
+			}
+			
+			if (!downloadUrl) throw new Error('分段导出超时');
+			
+			const indexContent = await downloadFile(downloadUrl);
+			const urls = indexContent.split('\n').filter(u => u.trim());
+			const accounts = [];
+			
+			for (const url of urls) {
+				if (url.trim()) {
+					const tsvData = await downloadFile(url.trim());
+					const parsed = parseTSVToAccounts(tsvData);
+					accounts.push(...parsed);
+				}
+			}
+			
+			// 补充封禁信息
+			for (const account of accounts) {
+				try {
+					const banInfo = await getPlayerBanInfo(account.playFabId);
+					account.isBanned = banInfo.isBanned;
+					account.banReason = banInfo.banReason;
+					account.banExpires = banInfo.banExpires;
+					account.banId = banInfo.banId;
+				} catch(e) {
+					account.isBanned = false;
+				}
+			}
+			
+			return accounts;
+		} catch (err) {
+			console.error('获取分段玩家失败:', err);
+			return [];
+		}
+	}
+
+	async function downloadFile(url) {
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error('下载失败: HTTP ' + response.status);
+		}
+		return await response.text();
+	}
+
+	function parseTSVToAccounts(tsvData) {
+		const lines = tsvData.split('\n').filter(l => l.trim());
+		if (lines.length < 2) return [];
+		
+		const headers = lines[0].split('\t');
+		const accounts = [];
+		
+		for (let i = 1; i < lines.length; i++) {
+			const values = lines[i].split('\t');
+			const account = {};
+			
+			headers.forEach((header, idx) => {
+				const val = (values[idx] || '').trim();
+				switch (header.trim()) {
+					case 'PlayFabId':
+					case 'PlayerId':
+						account.playFabId = val;
+						break;
+					case 'DisplayName':
+						account.displayName = val;
+						break;
+					case 'Email':
+						account.email = val;
+						break;
+					case 'Created':
+						account.createdTime = val;
+						break;
+					case 'LastLogin':
+						account.lastLoginTime = val;
+						break;
+					case 'DiamondBalance':
+					case 'DI':
+						account.diamondBalance = parseInt(val) || 0;
+						break;
+				}
+			});
+			
+			if (account.playFabId) accounts.push(account);
+		}
+		
+		return accounts;
+	}
     
     /**
      * PlayFab 客户端注册
@@ -556,6 +670,8 @@
         unbanPlayer,
         updateBanInfo,
         getPlayerBanInfo,
+		
+		getAccountsFromSegment,
         
         // 玩家搜索
         searchPlayerByPlayFabId,
