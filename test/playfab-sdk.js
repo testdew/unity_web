@@ -617,15 +617,26 @@
 	 * @param {string} platform - 平台名称 (Google, Steam, Facebook, etc.)
 	 * @param {string} platformUserId - 平台用户ID
 	 */
-	async function unlinkPlatformAccount(playFabId, platform, platformUserId) {
+	async function unlinkPlatform(playFabId, platform) {
 		if (!PlayFabSettings.secretKey) {
 			throw new Error('Admin API 需要配置 secretKey');
 		}
 		
-		var result = await callPlayFabAdminApi('UnlinkPlatformAccount', {
+		// 获取当前关联账号
+		const linked = await getLinkedPlatformAccounts(playFabId);
+		const targetLink = linked.linkedAccounts.find(function(link) {
+			return link.Platform === platform;
+		});
+		
+		if (!targetLink) {
+			throw new Error('未找到该平台关联账号');
+		}
+		
+		// 调用 PlayFab Admin API 解绑
+		const result = await callPlayFabAdminApi('UnlinkPlatform', {
 			PlayFabId: playFabId,
 			Platform: platform,
-			PlatformUserId: platformUserId
+			PlatformUserId: targetLink.PlatformUserId
 		});
 		
 		return result;
