@@ -611,6 +611,25 @@
 		return accounts;
 	}
     
+	/**
+	 * 解绑平台账号
+	 * @param {string} playFabId - 玩家 PlayFab ID
+	 * @param {string} platform - 平台名称 (Google, Steam, Facebook, etc.)
+	 * @param {string} platformUserId - 平台用户ID
+	 */
+	async function unlinkPlatformAccount(playFabId, platform, platformUserId) {
+		if (!PlayFabSettings.secretKey) {
+			throw new Error('Admin API 需要配置 secretKey');
+		}
+		
+		var result = await callPlayFabAdminApi('UnlinkPlatformAccount', {
+			PlayFabId: playFabId,
+			Platform: platform,
+			PlatformUserId: platformUserId
+		});
+		
+		return result;
+	}
     /**
      * PlayFab 客户端注册
      */
