@@ -1,6 +1,6 @@
 /**
  * 主逻辑模块 - 优化版
- * 去掉推荐列表中的原文显示，关闭推荐内容自动翻译
+ * 推荐列表只显示原文，不显示任何翻译或原文标注
  */
 
 // 等待 DOM 加载完成
@@ -37,11 +37,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSubType = '';
     let currentMainType = 'ban';
     
-    // 翻译相关变量（仅用于输入框翻译，不自动翻译推荐内容）
-    let translateEnabled = false;  // 默认关闭自动翻译
+    // 翻译相关变量（仅用于输入框翻译）
     let translatorEngine = 'google';
     let targetLang = 'en';
-    let autoTranslate = false;      // 推荐内容自动翻译开关（默认关闭）
     
     // 翻译器实例
     let translatorInstance = null;
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function saveSettingsToLocal() {
         localStorage.setItem('translator_engine', translatorEngine);
         localStorage.setItem('translator_lang', targetLang);
-        localStorage.setItem('translator_auto', autoTranslate);
         localStorage.setItem('baidu_app_id', baiduAppId?.value || '');
         localStorage.setItem('baidu_secret', baiduSecret?.value || '');
         localStorage.setItem('ms_api_key', msApiKey?.value || '');
@@ -90,11 +87,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function loadSettingsFromLocal() {
         translatorEngine = localStorage.getItem('translator_engine') || 'google';
         targetLang = localStorage.getItem('translator_lang') || 'en';
-        autoTranslate = localStorage.getItem('translator_auto') === 'true';
         
         if (translatorSelect) translatorSelect.value = translatorEngine;
         if (langSelect) langSelect.value = targetLang;
-        if (autoTranslateCheckbox) autoTranslateCheckbox.checked = autoTranslate;
         
         if (baiduAppId) baiduAppId.value = localStorage.getItem('baidu_app_id') || '';
         if (baiduSecret) baiduSecret.value = localStorage.getItem('baidu_secret') || '';
@@ -120,16 +115,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const urlEngine = urlParams.get('translator') || urlParams.get('t');
         const urlLang = urlParams.get('lang') || urlParams.get('l');
-        const urlAuto = urlParams.get('translate') === '1' || urlParams.get('auto') === '1';
         
         if (urlEngine) translatorEngine = urlEngine;
         if (urlLang) targetLang = urlLang;
-        if (urlAuto) autoTranslate = urlAuto;
         
         // 更新 UI
         if (translatorSelect) translatorSelect.value = translatorEngine;
         if (langSelect) langSelect.value = targetLang;
-        if (autoTranslateCheckbox) autoTranslateCheckbox.checked = autoTranslate;
         
         // 配置翻译管理器
         const config = {};
@@ -165,11 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
         
-        // 翻译功能仅在输入框手动翻译时启用，不自动翻译推荐内容
-        translateEnabled = false;  // 强制关闭自动翻译
-        
         console.log('翻译器已初始化:', translatorEngine, targetLang);
-        console.log('推荐内容自动翻译已关闭');
     }
     
     /**
@@ -234,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     /**
-     * 渲染推荐列表（不翻译，直接显示原文）
+     * 渲染推荐列表 - 只显示原文，没有任何额外文字
      */
     async function renderRecommendations() {
         const keyword = searchInput.value.trim();
@@ -249,12 +237,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const typeName = categoryNames[currentMainType] || '';
         
-        // 直接显示原文，不进行任何翻译
+        // 简洁的渲染：只显示原文和类型标签，没有任何"原文:"前缀或翻译
         optionList.innerHTML = items.map((item) => `
             <li data-id="${item.id}" data-text="${escapeHtml(item.text)}">
-                <div style="flex:1">
-                    <div>${escapeHtml(item.text)}</div>
-                </div>
+                <span style="flex:1;">${escapeHtml(item.text)}</span>
                 <span class="badge">${typeName}</span>
             </li>
         `).join('');
@@ -324,7 +310,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 保存翻译设置
         translatorEngine = translatorSelect.value;
         targetLang = langSelect.value;
-        autoTranslate = autoTranslateCheckbox.checked;
         
         saveSettingsToLocal();
         
@@ -444,8 +429,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             PostMessage.listenToParent((data) => {
                 if (data?.type === 'CLOSE_PICKER') {
                     closePicker();
-                } else if (data?.type === 'GET_TRANSLATE_STATUS') {
-                    PostMessage.sendTranslateStatus(translateEnabled, translatorEngine, targetLang);
                 }
             });
         } else {
