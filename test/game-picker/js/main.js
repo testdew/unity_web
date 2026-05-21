@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let targetLang = 'en';
     let autoTranslate = false;
     
+    // 翻译器实例
+    let translatorInstance = null;
+    
     // 缓存翻译结果
     const translationCache = new Map();
     
@@ -54,6 +57,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         reward: '补偿公告',
         maintenance: '维护公告'
     };
+    
+    /**
+     * 获取翻译器实例
+     */
+    function getTranslator() {
+        // 优先使用全局 translatorManager
+        if (window.translatorManager && window.translatorManager.currentTranslator) {
+            return window.translatorManager.currentTranslator;
+        }
+        // 使用本地实例
+        if (translatorInstance) {
+            return translatorInstance;
+        }
+        // 返回 null，降级处理
+        return null;
+    }
     
     /**
      * 保存设置到 localStorage
@@ -85,7 +104,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (msApiKey) msApiKey.value = localStorage.getItem('ms_api_key') || '';
         if (msRegion) msRegion.value = localStorage.getItem('ms_region') || 'global';
         
-        // 根据引擎显示对应的设置
         toggleEngineSettings(translatorEngine);
     }
     
@@ -126,6 +144,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             config.region = msRegion?.value || localStorage.getItem('ms_region') || 'global';
         }
         
+        // 初始化翻译器实例
+        if (translatorEngine === 'google' && typeof GoogleTranslator !== 'undefined') {
+            translatorInstance = new GoogleTranslator();
+        } else if (translatorEngine === 'baidu' && typeof BaiduTranslator !== 'undefined') {
+            translatorInstance = new BaiduTranslator(config);
+        } else if (translatorEngine === 'microsoft' && typeof MicrosoftTranslator !== 'undefined') {
+            translatorInstance = new MicrosoftTranslator(config);
+        } else {
+            // 降级：创建一个简单的翻译器
+            translatorInstance = {
+                translate: async (text, lang) => {
+                    console.warn('使用降级翻译器，返回原文');
+                    return text;
+                }
+            };
+        }
+        
+        // 也尝试使用全局管理器
         if (window.translatorManager) {
             window.translatorManager.init({
                 engine: translatorEngine,
@@ -135,6 +171,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         translateEnabled = autoTranslate;
+        
+        console.log('翻译器已初始化:', translatorEngine, targetLang);
     }
     
     /**
@@ -149,9 +187,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         try {
-            const translated = await window.translatorManager.translate(text);
+            let translated = text;
+            const translator = getTranslator();
+            
+            if (translator && typeof translator.translate === 'function') {
+                translated = await translator.translate(text, targetLang);
+            } else if (window.translatorManager && window.translatorManager.translate) {
+                translated = await window.translatorManager.translate(text);
+            } else {
+                console.warn('没有可用的翻译器，返回原文');
+                return text;
+            }
+            
             translationCache.set(cacheKey, translated);
             
+            // 限制缓存大小
             if (translationCache.size > 200) {
                 const firstKey = translationCache.keys().next().value;
                 translationCache.delete(firstKey);
@@ -179,6 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         translateInputBtn.disabled = true;
         
         try {
+            // 临时启用翻译
             const wasEnabled = translateEnabled;
             translateEnabled = true;
             const translated = await translateWithCache(originalText);
@@ -307,6 +358,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             config.region = msRegion?.value || 'global';
         }
         
+        // 重新创建翻译器实例
+        if (translatorEngine === 'google' && typeof GoogleTranslator !== 'undefined') {
+            translatorInstance = new GoogleTranslator();
+        } else if (translatorEngine === 'baidu' && typeof BaiduTranslator !== 'undefined') {
+            translatorInstance = new BaiduTranslator(config);
+        } else if (translatorEngine === 'microsoft' && typeof MicrosoftTranslator !== 'undefined') {
+            translatorInstance = new MicrosoftTranslator(config);
+        }
+        
         if (window.translatorManager) {
             window.translatorManager.init({
                 engine: translatorEngine,
@@ -323,6 +383,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // 关闭设置弹窗
         toggleSettingsModal(false);
+        
+        console.log('设置已保存');
     }
     
     /**
@@ -391,6 +453,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.ThemeManager) {
             window.ThemeManager.init();
             window.ThemeManager.bindThemeButtons();
+        } else {
+            console.warn('ThemeManager 未加载');
         }
     }
     
@@ -398,13 +462,17 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 监听来自父页面的消息
      */
     function initMessageListener() {
-        PostMessage.listenToParent((data) => {
-            if (data?.type === 'CLOSE_PICKER') {
-                closePicker();
-            } else if (data?.type === 'GET_TRANSLATE_STATUS') {
-                PostMessage.sendTranslateStatus(translateEnabled, translatorEngine, targetLang);
-            }
-        });
+        if (typeof PostMessage !== 'undefined') {
+            PostMessage.listenToParent((data) => {
+                if (data?.type === 'CLOSE_PICKER') {
+                    closePicker();
+                } else if (data?.type === 'GET_TRANSLATE_STATUS') {
+                    PostMessage.sendTranslateStatus(translateEnabled, translatorEngine, targetLang);
+                }
+            });
+        } else {
+            console.warn('PostMessage 未加载');
+        }
     }
     
     /**
@@ -504,6 +572,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         initTranslator();
         bindEvents();
         
+        // 检查 DataLoader 是否存在
+        if (typeof DataLoader === 'undefined') {
+            showErrorState('DataLoader 未加载，请检查文件引用');
+            return;
+        }
+        
         const result = await DataLoader.loadData();
         
         if (!result.success) {
@@ -512,6 +586,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         populateSubTypes();
+        
+        console.log('应用初始化完成');
     }
     
     init();
