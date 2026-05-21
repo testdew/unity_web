@@ -1,6 +1,6 @@
 /**
- * 百度翻译引擎 - 完整修复版
- * 支持从多种来源读取配置：URL参数、localStorage、config对象
+ * 百度翻译引擎 - 修复版
+ * 确保能从 URL 参数正确读取 AppId 和 Secret
  */
 
 class BaiduTranslator extends TranslatorBase {
@@ -9,54 +9,50 @@ class BaiduTranslator extends TranslatorBase {
         this.name = 'baidu';
         this.supportedLanguages = ['en', 'zh', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'th', 'vi'];
         
-        // 从多个来源读取配置（优先级：URL > config > localStorage）
-        this.appId = this.getConfigValue('baidu_app_id', config.appId);
-        this.secret = this.getConfigValue('baidu_secret', config.secret);
+        // 从多个来源读取配置，优先级：URL参数 > config > localStorage
+        this.appId = this.getUrlParam('baidu_app_id') || 
+                     this.getUrlParam('baiduAppId') || 
+                     config.appId || 
+                     localStorage.getItem('baidu_app_id') || 
+                     '';
         
-        // 百度 API 地址（使用 JSONP 方式避免跨域）
+        this.secret = this.getUrlParam('baidu_secret') || 
+                      this.getUrlParam('baiduSecret') || 
+                      config.secret || 
+                      localStorage.getItem('baidu_secret') || 
+                      '';
+        
+        // 百度 API 地址
         this.apiUrl = 'https://fanyi-api.baidu.com/api/trans/vip/translate';
         
         console.log('百度翻译初始化:', { 
             hasAppId: !!this.appId, 
             hasSecret: !!this.secret,
-            appIdValue: this.appId ? this.appId.substring(0, 10) + '...' : '未设置'
+            appIdValue: this.appId ? this.appId.substring(0, 10) + '...' : '未找到',
+            secretValue: this.secret ? '已设置' : '未找到'
         });
     }
 
     /**
-     * 获取配置值（从 URL > 传入值 > localStorage）
+     * 从 URL 参数读取（确保能正确读取）
      */
-    getConfigValue(paramName, configValue) {
-        // 1. 优先从 URL 参数读取
+    getUrlParam(name) {
         const urlParams = new URLSearchParams(window.location.search);
-        const urlValue = urlParams.get(paramName);
-        if (urlValue) {
-            console.log(`从 URL 读取到 ${paramName}:`, urlValue.substring(0, 10) + '...');
-            return urlValue;
+        const value = urlParams.get(name);
+        if (value) {
+            console.log(`从 URL 读取到参数 ${name}:`, value.substring(0, 10) + '...');
         }
-        
-        // 2. 其次使用传入的 config 值
-        if (configValue) {
-            console.log(`从 config 读取到 ${paramName}`);
-            return configValue;
-        }
-        
-        // 3. 最后从 localStorage 读取
-        const storedValue = localStorage.getItem(paramName);
-        if (storedValue) {
-            console.log(`从 localStorage 读取到 ${paramName}`);
-            return storedValue;
-        }
-        
-        return '';
+        return value || '';
     }
 
     isAvailable() {
         const available = !!(this.appId && this.secret);
         if (!available) {
-            console.warn('百度翻译未配置 AppId 或 Secret');
-            console.warn('请在 URL 中添加参数: baidu_app_id 和 baidu_secret');
-            console.warn('示例: ?t=baidu&l=en&translate=1&baidu_app_id=你的ID&baidu_secret=你的密钥');
+            console.warn('百度翻译未配置:', { 
+                hasAppId: !!this.appId, 
+                hasSecret: !!this.secret,
+                currentUrl: window.location.href
+            });
         }
         return available;
     }
@@ -69,28 +65,28 @@ class BaiduTranslator extends TranslatorBase {
     }
 
     /**
-     * 生成 MD5 签名
+     * 生成签名
+     * 百度签名规则：sign = MD5(appId + text + salt + secret)
      */
     generateSign(text, salt) {
         const str = this.appId + text + salt + this.secret;
-        
-        // 使用 CryptoJS 进行 MD5（需要引入库）
-        if (typeof CryptoJS !== 'undefined' && CryptoJS.MD5) {
-            return CryptoJS.MD5(str).toString();
-        }
-        
-        // 如果没有 CryptoJS，使用简单哈希（仅用于测试，生产环境建议引入）
-        console.warn('未找到 CryptoJS 库，使用简单哈希（可能无法通过百度验证）');
-        return this.simpleHash(str);
+        console.log('生成签名，原始字符串长度:', str.length);
+        return this.md5(str);
     }
 
     /**
-     * 简单哈希（备用）
+     * MD5 加密
      */
-    simpleHash(str) {
+    md5(string) {
+        // 优先使用 CryptoJS
+        if (typeof CryptoJS !== 'undefined' && CryptoJS.MD5) {
+            return CryptoJS.MD5(string).toString();
+        }
+        // 降级方案：简单哈希（不推荐）
+        console.warn('未找到 CryptoJS，使用简单哈希');
         let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
+        for (let i = 0; i < string.length; i++) {
+            const char = string.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
             hash = hash & hash;
         }
@@ -98,8 +94,17 @@ class BaiduTranslator extends TranslatorBase {
     }
 
     async translate(text, targetLang) {
-        if (!this.isAvailable()) {
-            throw new Error('百度翻译未配置 API Key，请在 URL 参数中设置 baidu_app_id 和 baidu_secret');
+        // 再次检查配置（防止初始化后配置丢失）
+        if (!this.appId || !this.secret) {
+            // 尝试重新从 URL 读取
+            this.appId = this.getUrlParam('baidu_app_id') || this.getUrlParam('baiduAppId') || '';
+            this.secret = this.getUrlParam('baidu_secret') || this.getUrlParam('baiduSecret') || '';
+            
+            if (!this.appId || !this.secret) {
+                const errorMsg = `百度翻译未配置。请在 URL 中添加参数: baidu_app_id 和 baidu_secret\n当前URL: ${window.location.href}`;
+                console.error(errorMsg);
+                return `[翻译失败: 未配置百度翻译] ${text}`;
+            }
         }
 
         // 百度语言代码映射
@@ -122,7 +127,7 @@ class BaiduTranslator extends TranslatorBase {
         const salt = this.generateSalt();
         const sign = this.generateSign(text, salt);
         
-        console.log('百度翻译请求:', { text: text.substring(0, 30) + '...', to, appId: this.appId });
+        console.log('百度翻译请求:', { text: text.substring(0, 50), to, salt, sign: sign.substring(0, 10) });
         
         // 使用 JSONP 方式调用
         return new Promise((resolve, reject) => {
@@ -130,16 +135,18 @@ class BaiduTranslator extends TranslatorBase {
             
             window[callbackName] = (data) => {
                 delete window[callbackName];
-                document.body.removeChild(script);
+                if (document.body.contains(script)) {
+                    document.body.removeChild(script);
+                }
                 
                 if (data && data.trans_result && data.trans_result.length > 0) {
-                    console.log('百度翻译成功:', data.trans_result[0].dst.substring(0, 50));
+                    console.log('百度翻译成功:', data.trans_result[0].dst);
                     resolve(data.trans_result[0].dst);
                 } else if (data && data.error_msg) {
                     console.error('百度翻译错误:', data.error_msg);
                     reject(new Error(data.error_msg));
                 } else {
-                    reject(new Error('翻译失败：响应格式异常'));
+                    reject(new Error('翻译失败，响应格式异常'));
                 }
             };
             
@@ -149,20 +156,24 @@ class BaiduTranslator extends TranslatorBase {
             script.src = url;
             script.onerror = () => {
                 delete window[callbackName];
-                document.body.removeChild(script);
-                reject(new Error('网络请求失败，请检查网络'));
+                if (document.body.contains(script)) {
+                    document.body.removeChild(script);
+                }
+                reject(new Error('网络请求失败，请检查网络连接'));
             };
             
             document.body.appendChild(script);
             
-            // 超时处理（15秒）
+            // 超时处理
             setTimeout(() => {
                 if (window[callbackName]) {
                     delete window[callbackName];
-                    document.body.removeChild(script);
-                    reject(new Error('百度翻译请求超时'));
+                    if (document.body.contains(script)) {
+                        document.body.removeChild(script);
+                    }
+                    reject(new Error('百度翻译请求超时 (10秒)'));
                 }
-            }, 15000);
+            }, 10000);
         });
     }
 }
