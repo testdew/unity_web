@@ -565,7 +565,10 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function init() {
         showLoadingState();
-        
+        const url = new URL(window.location.href);
+console.log('完整URL:', url.href);
+console.log('baidu_app_id:', url.searchParams.get('baidu_app_id'));
+console.log('baidu_secret:', url.searchParams.get('baidu_secret'));
         initTheme();
         initMessageListener();
         loadSettingsFromLocal();
