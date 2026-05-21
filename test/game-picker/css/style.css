@@ -21,6 +21,7 @@ body {
     border-radius: 24px;
     padding: 24px;
     transition: all 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .picker-header {
@@ -79,7 +80,6 @@ body {
 .panel-title {
     font-size: 14px;
     font-weight: 600;
-    color: #ffd89b;
 }
 
 .input-area textarea {
@@ -97,8 +97,7 @@ body {
 
 .input-area textarea:focus {
     outline: none;
-    border-color: #ff6b6b;
-    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.01);
 }
 
 .input-actions {
@@ -120,8 +119,8 @@ body {
 }
 
 .action-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .confirm-btn {
@@ -179,7 +178,6 @@ body {
 .filter-item select:focus,
 .filter-item .search-input:focus {
     outline: none;
-    border-color: #ff6b6b;
     transform: scale(1.01);
 }
 
@@ -424,12 +422,11 @@ body {
 
 .theme-option-btn:hover {
     transform: translateX(4px);
-    border-color: #667eea;
 }
 
 .theme-option-btn.active {
     border-color: #667eea;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    background: rgba(102, 126, 234, 0.2);
 }
 
 /* 主题预览 */
@@ -497,23 +494,36 @@ body {
     margin-right: 6px;
 }
 
-/* ==================== 主题样式（修复风格切换） ==================== */
-
-/* 主题1：暗夜游戏风 */
+/* ==================== 风格1：暗夜游戏风 ==================== */
 .theme-dark {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: #eee;
+}
+.theme-dark .picker-header h3 {
+    background: linear-gradient(135deg, #ffd89b, #c7e9fb);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.theme-dark .panel-title {
+    color: #ffd89b;
 }
 .theme-dark .filter-item select,
 .theme-dark .filter-item .search-input {
     background: rgba(0, 0, 0, 0.4);
     border-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+.theme-dark .filter-item select:hover,
+.theme-dark .filter-item .search-input:hover {
+    border-color: #ff6b6b;
 }
 .theme-dark .option-list li {
     background: rgba(255, 255, 255, 0.05);
 }
 .theme-dark .option-list li:hover {
     background: rgba(255, 107, 107, 0.3);
+    transform: translateX(4px);
 }
 .theme-dark .section-title {
     color: #ffd89b;
@@ -522,14 +532,33 @@ body {
     background: rgba(0, 0, 0, 0.5);
     color: #ffd89b;
 }
-.theme-dark .settings-modal-content {
-    background: rgba(30, 30, 46, 0.98);
+.theme-dark .action-icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+}
+.theme-dark .action-icon-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+}
+.theme-dark .circle-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+}
+.theme-dark .circle-close-btn:hover {
+    background: #ff6b6b;
+    color: white;
 }
 
-/* 主题2：清新少女粉 */
+/* ==================== 风格2：清新少女粉 ==================== */
 .theme-pink {
     background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
     color: #5a3d5c;
+}
+.theme-pink .picker-header h3 {
+    background: linear-gradient(135deg, #ff6b9d, #a6c1ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.theme-pink .panel-title {
+    color: #ff6b9d;
 }
 .theme-pink .filter-item select,
 .theme-pink .filter-item .search-input {
@@ -537,12 +566,17 @@ body {
     border-color: #ffb3ba;
     color: #5a3d5c;
 }
+.theme-pink .filter-item select:hover,
+.theme-pink .filter-item .search-input:hover {
+    border-color: #ff6b9d;
+}
 .theme-pink .option-list li {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(5px);
 }
 .theme-pink .option-list li:hover {
     background: rgba(255, 255, 255, 0.9);
+    transform: translateX(4px);
 }
 .theme-pink .section-title {
     color: #ff6b9d;
@@ -551,23 +585,40 @@ body {
     background: rgba(255, 255, 255, 0.8);
     color: #ff6b9d;
 }
-.theme-pink .picker-header h3 {
-    background: linear-gradient(135deg, #ff6b9d, #a6c1ee);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+.theme-pink .action-icon-btn {
+    background: rgba(255, 255, 255, 0.5);
+}
+.theme-pink .action-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+.theme-pink .circle-close-btn {
+    background: rgba(255, 255, 255, 0.4);
+}
+.theme-pink .circle-close-btn:hover {
+    background: #ff6b9d;
+    color: white;
 }
 .theme-pink .settings-modal-content {
     background: rgba(255, 235, 240, 0.98);
     color: #5a3d5c;
 }
 
-/* 主题3：科技赛博朋克 */
+/* ==================== 风格3：科技赛博朋克 ==================== */
 .theme-cyber {
     background: linear-gradient(135deg, #0a0f1e 0%, #0d1b2a 100%);
     color: #00ffcc;
     border: 1px solid #00ffcc40;
     box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+}
+.theme-cyber .picker-header h3 {
+    background: linear-gradient(135deg, #00ffcc, #ff00ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.theme-cyber .panel-title {
+    color: #00ffcc;
+    text-shadow: 0 0 5px #00ffcc;
 }
 .theme-cyber .filter-item select,
 .theme-cyber .filter-item .search-input {
@@ -576,6 +627,11 @@ body {
     color: #00ffcc;
     font-family: monospace;
 }
+.theme-cyber .filter-item select:hover,
+.theme-cyber .filter-item .search-input:hover {
+    border-color: #ff00ff;
+    box-shadow: 0 0 10px #ff00ff;
+}
 .theme-cyber .option-list li {
     background: rgba(0, 255, 204, 0.1);
     border-left: 2px solid #00ffcc;
@@ -583,6 +639,7 @@ body {
 .theme-cyber .option-list li:hover {
     background: rgba(0, 255, 204, 0.2);
     box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+    transform: translateX(4px);
 }
 .theme-cyber .section-title {
     color: #ff00ff;
@@ -593,23 +650,43 @@ body {
     color: #ff00ff;
     border: 1px solid #ff00ff;
 }
-.theme-cyber .picker-header h3 {
-    background: linear-gradient(135deg, #00ffcc, #ff00ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+.theme-cyber .action-icon-btn {
+    background: rgba(0, 255, 204, 0.15);
+    border: 1px solid #00ffcc;
+}
+.theme-cyber .action-icon-btn:hover {
+    background: rgba(0, 255, 204, 0.3);
+    box-shadow: 0 0 10px #00ffcc;
+}
+.theme-cyber .circle-close-btn {
+    background: rgba(0, 255, 204, 0.2);
+    border: 1px solid #00ffcc;
+}
+.theme-cyber .circle-close-btn:hover {
+    background: #ff00ff;
+    border-color: #ff00ff;
+    color: #0a0f1e;
 }
 .theme-cyber .settings-modal-content {
     background: rgba(10, 15, 30, 0.98);
     border: 1px solid #00ffcc;
 }
 
-/* 主题4：简约商务白 */
+/* ==================== 风格4：简约商务白 ==================== */
 .theme-white {
     background: #ffffff;
     color: #333;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     border: 1px solid #e0e0e0;
+}
+.theme-white .picker-header h3 {
+    background: linear-gradient(135deg, #2c7da0, #61a5c2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.theme-white .panel-title {
+    color: #2c7da0;
 }
 .theme-white .filter-item select,
 .theme-white .filter-item .search-input {
@@ -617,12 +694,17 @@ body {
     border-color: #ddd;
     color: #333;
 }
+.theme-white .filter-item select:hover,
+.theme-white .filter-item .search-input:hover {
+    border-color: #2c7da0;
+}
 .theme-white .option-list li {
     background: #f9f9f9;
     border-bottom: 1px solid #eee;
 }
 .theme-white .option-list li:hover {
     background: #e8f4ff;
+    transform: translateX(4px);
 }
 .theme-white .section-title {
     color: #2c7da0;
@@ -631,11 +713,21 @@ body {
     background: #e0e0e0;
     color: #666;
 }
-.theme-white .picker-header h3 {
-    background: linear-gradient(135deg, #2c7da0, #61a5c2);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+.theme-white .action-icon-btn {
+    background: #f0f0f0;
+    color: #333;
+}
+.theme-white .action-icon-btn:hover {
+    background: #2c7da0;
+    color: white;
+}
+.theme-white .circle-close-btn {
+    background: #f0f0f0;
+    color: #333;
+}
+.theme-white .circle-close-btn:hover {
+    background: #2c7da0;
+    color: white;
 }
 .theme-white .settings-modal-content {
     background: rgba(255, 255, 255, 0.98);
@@ -643,10 +735,19 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* 主题5：热血中国红 */
+/* ==================== 风格5：热血中国红 ==================== */
 .theme-red {
     background: linear-gradient(135deg, #8b0000 0%, #c41e3a 100%);
     color: #fff4e6;
+}
+.theme-red .picker-header h3 {
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.theme-red .panel-title {
+    color: #ffd700;
 }
 .theme-red .filter-item select,
 .theme-red .filter-item .search-input {
@@ -654,11 +755,17 @@ body {
     border-color: #ffd700;
     color: #ffd700;
 }
+.theme-red .filter-item select:hover,
+.theme-red .filter-item .search-input:hover {
+    border-color: #ffaa00;
+    background: rgba(0, 0, 0, 0.5);
+}
 .theme-red .option-list li {
     background: rgba(255, 215, 0, 0.1);
 }
 .theme-red .option-list li:hover {
     background: rgba(255, 215, 0, 0.3);
+    transform: translateX(4px);
 }
 .theme-red .section-title {
     color: #ffd700;
@@ -667,14 +774,31 @@ body {
     background: rgba(0, 0, 0, 0.5);
     color: #ffd700;
 }
+.theme-red .action-icon-btn {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid #ffd700;
+}
+.theme-red .action-icon-btn:hover {
+    background: rgba(255, 215, 0, 0.3);
+}
+.theme-red .circle-close-btn {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+}
+.theme-red .circle-close-btn:hover {
+    background: #ffd700;
+    color: #8b0000;
+}
 .theme-red .settings-modal-content {
     background: rgba(139, 0, 0, 0.98);
+    border: 1px solid #ffd700;
 }
 
-/* 响应式适配 */
+/* ==================== 响应式适配 ==================== */
 @media (max-width: 600px) {
     .picker-container {
         padding: 16px;
+        width: 95vw;
     }
     
     .filter-bar {
@@ -697,5 +821,9 @@ body {
     
     .settings-modal-content {
         width: 95vw;
+    }
+    
+    .option-list {
+        max-height: 200px;
     }
 }
