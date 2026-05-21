@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏运营选择器 - 多风格翻译版</title>
+    <title>游戏运营选择器 - 优化版</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="picker-container theme-dark" id="pickerContainer">
+        <!-- 右上角圆形关闭按钮 -->
+        <button class="circle-close-btn" id="closeBtn">✕</button>
+
         <div class="picker-header">
             <h3>🎮 游戏运营工具箱</h3>
-            <p>选择类型 → 选择子类型 → 点击文本快速填入</p>
+            <p>选择类型 → 选择子类型 → 点击文本 → 确认发送</p>
         </div>
 
         <!-- 风格选择器 -->
@@ -46,8 +49,6 @@
                         <option value="de">Deutsch</option>
                         <option value="es">Español</option>
                         <option value="ru">Русский</option>
-                        <option value="ar">العربية</option>
-                        <option value="pt">Português</option>
                     </select>
                     <button id="translateToggleBtn" class="style-btn" style="background: #667eea; color: white; padding: 8px 16px;">🔘 开启翻译</button>
                 </div>
@@ -89,7 +90,20 @@
             </ul>
         </div>
 
-        <button class="close-btn" id="closeBtn">✖ 关闭选择器</button>
+        <!-- 新增：输入框区域 -->
+        <div class="selected-area">
+            <div class="selected-header">
+                <label>✏️ 已选内容</label>
+                <button id="translateInputBtn" class="mini-btn" title="翻译输入框内容">🌐 翻译</button>
+            </div>
+            <div class="input-wrapper">
+                <textarea id="selectedText" rows="2" placeholder="点击上方推荐文案后，内容会显示在这里，可以编辑修改..."></textarea>
+            </div>
+            <div class="action-buttons">
+                <button id="confirmBtn" class="confirm-btn">✓ 确认发送</button>
+                <button id="clearBtn" class="clear-btn">✗ 清空</button>
+            </div>
+        </div>
     </div>
 
     <!-- 翻译模块（必须按顺序） -->

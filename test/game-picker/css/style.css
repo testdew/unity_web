@@ -399,3 +399,185 @@ select:focus, .search-input:focus {
     background: #ffd700;
     color: #8b0000;
 }
+/* ==================== 圆形关闭按钮 ==================== */
+.circle-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.circle-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* 各主题下的关闭按钮颜色 */
+.theme-dark .circle-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+.theme-pink .circle-close-btn {
+    background: rgba(255, 255, 255, 0.5);
+    color: #5a3d5c;
+}
+.theme-cyber .circle-close-btn {
+    background: rgba(0, 255, 204, 0.2);
+    color: #00ffcc;
+    border: 1px solid #00ffcc;
+}
+.theme-white .circle-close-btn {
+    background: #e0e0e0;
+    color: #333;
+}
+.theme-red .circle-close-btn {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+}
+
+/* ==================== 已选内容区域 ==================== */
+.selected-area {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+}
+
+.selected-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.selected-header label {
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.mini-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 20px;
+    font-size: 11px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+    color: inherit;
+    transition: all 0.2s;
+}
+
+.mini-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.input-wrapper {
+    margin-bottom: 12px;
+}
+
+.input-wrapper textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.3);
+    color: inherit;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.2s;
+}
+
+.input-wrapper textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.confirm-btn, .clear-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.confirm-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+}
+
+.clear-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+}
+
+.clear-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* 各主题的确认按钮 */
+.theme-cyber .confirm-btn {
+    background: linear-gradient(135deg, #00ffcc, #ff00ff);
+    color: #0a0f1e;
+}
+.theme-red .confirm-btn {
+    background: linear-gradient(135deg, #ffd700, #ff6b6b);
+    color: #8b0000;
+}
+.theme-pink .confirm-btn {
+    background: linear-gradient(135deg, #ff6b9d, #a6c1ee);
+    color: #fff;
+}
+.theme-white .confirm-btn {
+    background: linear-gradient(135deg, #2c7da0, #61a5c2);
+    color: #fff;
+}
+
+/* 翻译中动画 */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.translating {
+    animation: pulse 0.5s ease-in-out infinite;
+}
+
+/* 成功提示动画 */
+@keyframes successFlash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(102, 126, 234, 0.3); }
+    100% { background-color: transparent; }
+}
+
+.success-flash {
+    animation: successFlash 0.5s ease;
+}
