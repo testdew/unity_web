@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏运营选择器 - 多风格版</title>
+    <title>游戏运营选择器 - 多风格翻译版</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -23,6 +23,36 @@
                     <button data-theme="cyber" class="style-btn">💻 赛博</button>
                     <button data-theme="white" class="style-btn">📄 简约</button>
                     <button data-theme="red" class="style-btn">🧧 中国红</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 翻译控制区 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label>🌐 翻译设置</label>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="translatorSelect" style="flex: 1; min-width: 100px; padding: 8px; border-radius: 8px;">
+                        <option value="google">Google 翻译</option>
+                        <option value="baidu">百度翻译</option>
+                        <option value="microsoft">微软翻译</option>
+                    </select>
+                    <select id="langSelect" style="flex: 1; min-width: 100px; padding: 8px; border-radius: 8px;">
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="es">Español</option>
+                        <option value="ru">Русский</option>
+                        <option value="ar">العربية</option>
+                        <option value="pt">Português</option>
+                    </select>
+                    <button id="translateToggleBtn" class="style-btn" style="background: #667eea; color: white; padding: 8px 16px;">🔘 开启翻译</button>
+                </div>
+                <div id="translateStatus" style="font-size: 11px; margin-top: 8px; color: #888;">
+                    ⚙️ 翻译状态：未启用
                 </div>
             </div>
         </div>
@@ -62,7 +92,14 @@
         <button class="close-btn" id="closeBtn">✖ 关闭选择器</button>
     </div>
 
-    <!-- 加载脚本模块 -->
+    <!-- 翻译模块（必须按顺序） -->
+    <script src="js/translators/translator-base.js"></script>
+    <script src="js/translators/google-translator.js"></script>
+    <script src="js/translators/baidu-translator.js"></script>
+    <script src="js/translators/microsoft-translator.js"></script>
+    <script src="js/translators/translator-manager.js"></script>
+
+    <!-- 其他模块 -->
     <script src="js/theme-manager.js"></script>
     <script src="js/post-message.js"></script>
     <script src="js/data-loader.js"></script>

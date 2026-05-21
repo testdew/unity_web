@@ -24,3 +24,49 @@
 
 ```bash
 npx wrangler pages deploy ./game-picker --project-name=game-picker
+
+
+# 使用 Google 翻译成日语，自动启用
+https://testdew.github.io/unity_web/test/game-picker/index.html?translator=google&lang=ja&translate=1
+
+# 使用百度翻译成韩语
+https://testdew.github.io/unity_web/test/game-picker/index.html?t=baidu&l=ko&translate=1&baidu_app_id=2024xxxx&baidu_secret=xxxx
+
+# 使用微软翻译成法语
+https://testdew.github.io/unity_web/test/game-picker/index.html?t=microsoft&l=fr&translate=1&ms_api_key=xxxx&ms_region=global
+
+
+
+<!-- 父页面：你的网站 -->
+<input type="text" id="myInput" placeholder="点击按钮选择文案">
+<button onclick="openPicker()">选择公告</button>
+
+<div id="pickerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+    <iframe id="pickerIframe" src="https://testdew.github.io/unity_web/test/game-picker/index.html" style="width:520px; height:580px; border:none;"></iframe>
+</div>
+
+<script>
+    const modal = document.getElementById('pickerModal');
+    const iframe = document.getElementById('pickerIframe');
+
+    function openPicker() {
+        modal.style.display = 'flex';
+    }
+
+    window.addEventListener('message', function(e) {
+        // 建议验证来源：if (e.origin !== 'https://testdew.github.io') return;
+        
+        if (e.data.type === 'TEXT_SELECTED') {
+            document.getElementById('myInput').value = e.data.value;
+            modal.style.display = 'none';
+        } else if (e.data.type === 'PICKER_CLOSED') {
+            modal.style.display = 'none';
+        }
+    });
+</script>
+
+
+
+
+
+
