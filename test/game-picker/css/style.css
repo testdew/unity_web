@@ -23,6 +23,27 @@ body {
     padding: 24px;
     transition: all 0.3s ease;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* 自定义容器滚动条 */
+.picker-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.picker-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.picker-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.picker-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width: 620px) {
@@ -265,9 +286,9 @@ body {
     }
 }
 
-/* ==================== 推荐列表 ==================== */
+/* ==================== 推荐列表（自由高度） ==================== */
 .recommend-section {
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .section-title {
@@ -277,6 +298,11 @@ body {
     align-items: center;
     gap: 8px;
     font-weight: 600;
+    position: sticky;
+    top: 0;
+    background: inherit;
+    padding: 4px 0;
+    z-index: 1;
 }
 
 .section-title span {
@@ -287,9 +313,10 @@ body {
 
 .option-list {
     list-style: none;
-    max-height: 280px;
-    overflow-y: auto;
     border-radius: 16px;
+    margin-bottom: 0;
+    max-height: none;
+    overflow: visible;
 }
 
 .option-list li {
@@ -308,26 +335,18 @@ body {
     transform: translateX(4px);
 }
 
+.option-list li:last-child {
+    margin-bottom: 0;
+}
+
 .badge {
     font-size: 10px;
     padding: 3px 10px;
     border-radius: 20px;
     font-weight: 500;
-}
-
-.option-list::-webkit-scrollbar {
-    width: 4px;
-}
-
-.option-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.option-list::-webkit-scrollbar-thumb {
-    background: currentColor;
-    border-radius: 4px;
-    opacity: 0.5;
+    flex-shrink: 0;
+    margin-left: 12px;
+    white-space: nowrap;
 }
 
 .empty-tip {
@@ -892,9 +911,5 @@ body {
     
     .settings-modal-content {
         width: 95vw;
-    }
-    
-    .option-list {
-        max-height: 200px;
     }
 }
