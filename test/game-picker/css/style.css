@@ -286,7 +286,7 @@ body {
     }
 }
 
-/* ==================== 推荐列表（自由高度） ==================== */
+/* ==================== 推荐列表（无滚动条，自由高度） ==================== */
 .recommend-section {
     margin-top: 8px;
 }
@@ -298,11 +298,6 @@ body {
     align-items: center;
     gap: 8px;
     font-weight: 600;
-    position: sticky;
-    top: 0;
-    background: inherit;
-    padding: 4px 0;
-    z-index: 1;
 }
 
 .section-title span {
@@ -316,7 +311,18 @@ body {
     border-radius: 16px;
     margin-bottom: 0;
     max-height: none;
+    height: auto;
     overflow: visible;
+}
+
+/* 完全移除滚动条 */
+.option-list::-webkit-scrollbar {
+    display: none;
+}
+
+.option-list {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .option-list li {
