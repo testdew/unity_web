@@ -1,1 +1,73 @@
-c3NzDQoNCiMg6YOo572y5YiwIEdpdEh1YiBQYWdlcw0Kbm9kZSBkZXBsb3kuanMgZ2l0aHViIC10IGdocF94eHggLXIgdXNlcm5hbWUvcmVwbyAtcCAuL2Rpc3QNCg0KIyDpg6jnvbLliLAgTmV0bGlmeQ0Kbm9kZSBkZXBsb3kuanMgbmV0bGlmeSAtdCBuZXRsaWZ5X3h4eCAtbiBteS1zaXRlIC1wIC4vZGlzdA0KDQojIOmDqOe9suWIsCBWZXJjZWwNCm5vZGUgZGVwbG95LmpzIHZlcmNlbCAtdCB2ZXJjZWxfeHh4IC1uIG15LXByb2plY3QgLXAgLi9kaXN0DQoNCiMg6YOo572y5Yiw6IW+6K6v5LqRIENsb3VkQmFzZQ0Kbm9kZSBkZXBsb3kuanMgY2xvdWRiYXNlIC1lIGVudi14eHggLS1zZWNyZXQtaWQgQUtJRHh4eCAtLXNlY3JldC1rZXkgeHh4IC1wIC4vZGlzdA0KDQojIOmDqOe9suWIsCB0ZWJpLmlvDQpub2RlIGRlcGxveS5qcyB0ZWJpIC1iIG15LWJ1Y2tldCAtYSBBS0lEeHh4IC1zIHh4eCAtcCAuL2Rpc3QNCg0KDQojIEdpdEh1Yg0KREVQTE9ZX1RPS0VOPWdpdGh1Yl9wYXRfeHh4DQpHSVRIVUJfUkVQTz11c2VybmFtZS9yZXBvDQpHSVRIVUJfQlJBTkNIPWdoLXBhZ2VzDQoNCiMgTmV0bGlmeQ0KTkVUTElGWV9UT0tFTj14eHgNCk5FVExJRllfU0lURV9JRD14eHgNCg0KIyBWZXJjZWwNClZFUkNFTF9UT0tFTj14eHgNClZFUkNFTF9QUk9KRUNUX05BTUU9bXktc2l0ZQ0KDQojIENsb3VkQmFzZQ0KQ0xPVURCQVNFX0VOVl9JRD1lbnYteHh4DQpDTE9VREJBU0VfU0VDUkVUX0lEPUFLSUR4eHgNCkNMT1VEQkFTRV9TRUNSRVRfS0VZPXh4eA0KDQojIHRlYmkuaW8NClRFQklfQlVDS0VUPW15LWJ1Y2tldA0KVEVCSV9BQ0NFU1NfS0VZPXh4eA0KVEVCSV9TRUNSRVRfS0VZPXh4eA0KDQoNCiMgR2l0SHViIFBhZ2VzDQpucG0gaW5zdGFsbCBAYWN0aW9ucy9naXRodWINCg0KIyBOZXRsaWZ5ICjpnIDopoEgYXJjaGl2ZXIpDQpucG0gaW5zdGFsbCBhcmNoaXZlcg0KDQojIOiFvuiur+S6kSBDbG91ZEJhc2UNCm5wbSBpbnN0YWxsIEBjbG91ZGJhc2Uvbm9kZS1zZGsNCg0KIyB0ZWJpLmlvDQpucG0gaW5zdGFsbCBhd3Mtc2RrDQoNCiMg6YCa55SoDQpucG0gaW5zdGFsbCBheGlvcyBmb3JtLWRhdGEgZ2xvYg0KDQoNCiMgMS4g5a6J6KOF5L6d6LWWDQpucG0gaW5zdGFsbCBheGlvcyBmb3JtLWRhdGEgZ2xvYiBAYWN0aW9ucy9naXRodWIgYXJjaGl2ZXIgQGNsb3VkYmFzZS9ub2RlLXNkayBhd3Mtc2RrDQoNCiMgMi4g5Yib5bu66YWN572u5paH5Lu2IC5kZXBsb3ktY29uZmlnLmpzb24NCg0KIyAzLiDov5DooYzvvIjkvJrpg6jnvbLliLDmiYDmnIkgZW5hYmxlZDogdHJ1ZSDnmoTlubPlj7DvvIkNCm5vZGUgZGVwbG95LmpzDQoNCg0KDQoNCg0KDQoNCg0K
+sss
+
+# 部署到 GitHub Pages
+node deploy.js github -t ghp_xxx -r username/repo -p ./dist
+
+# 部署到 Netlify
+node deploy.js netlify -t netlify_xxx -n my-site -p ./dist
+
+# 部署到 Vercel
+node deploy.js vercel -t vercel_xxx -n my-project -p ./dist
+
+# 部署到腾讯云 CloudBase
+node deploy.js cloudbase -e env-xxx --secret-id AKIDxxx --secret-key xxx -p ./dist
+
+# 部署到 tebi.io
+node deploy.js tebi -b my-bucket -a AKIDxxx -s xxx -p ./dist
+
+
+# GitHub
+DEPLOY_TOKEN=github_pat_xxx
+GITHUB_REPO=username/repo
+GITHUB_BRANCH=gh-pages
+
+# Netlify
+NETLIFY_TOKEN=xxx
+NETLIFY_SITE_ID=xxx
+
+# Vercel
+VERCEL_TOKEN=xxx
+VERCEL_PROJECT_NAME=my-site
+
+# CloudBase
+CLOUDBASE_ENV_ID=env-xxx
+CLOUDBASE_SECRET_ID=AKIDxxx
+CLOUDBASE_SECRET_KEY=xxx
+
+# tebi.io
+TEBI_BUCKET=my-bucket
+TEBI_ACCESS_KEY=xxx
+TEBI_SECRET_KEY=xxx
+
+
+# GitHub Pages
+npm install @actions/github
+
+# Netlify (需要 archiver)
+npm install archiver
+
+# 腾讯云 CloudBase
+npm install @cloudbase/node-sdk
+
+# tebi.io
+npm install aws-sdk
+
+# 通用
+npm install axios form-data glob
+
+
+# 1. 安装依赖
+npm install axios form-data glob @actions/github archiver @cloudbase/node-sdk aws-sdk
+
+# 2. 创建配置文件 .deploy-config.json
+
+# 3. 运行（会部署到所有 enabled: true 的平台）
+node deploy.js
+
+
+
+
+
+
+
+
