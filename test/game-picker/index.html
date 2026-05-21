@@ -5,192 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>游戏运营选择器 - 多风格翻译版</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* 新增样式 - 圆形关闭按钮 */
-        .close-circle {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: inherit;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            z-index: 10;
-        }
-        .close-circle:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(90deg);
-        }
-        .picker-container {
-            position: relative;
-        }
-        
-        /* 输入框区域 */
-        .selected-area {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .selected-label {
-            font-size: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .selected-input-wrapper {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .selected-input-wrapper input {
-            flex: 1;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.3);
-            color: inherit;
-            font-size: 14px;
-        }
-        .selected-input-wrapper input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .translate-input-btn {
-            padding: 8px 16px;
-            border-radius: 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .confirm-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .confirm-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.05);
-        }
-        
-        /* 翻译设置面板 - 默认隐藏 */
-        .translate-settings-panel {
-            display: none;
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-        }
-        .translate-settings-panel.show {
-            display: block;
-        }
-        .settings-toggle {
-            background: none;
-            border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-        .settings-toggle:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-        
-        /* 主题适配 */
-        .theme-white .selected-input-wrapper input {
-            background: #f5f5f5;
-            border-color: #ddd;
-            color: #333;
-        }
-        .theme-white .translate-settings-panel {
-            background: #f0f0f0;
-        }
-        .theme-cyber .selected-input-wrapper input {
-            border-color: #00ffcc;
-        }
-        .theme-red .confirm-btn {
-            background: linear-gradient(135deg, #ffd700, #c41e3a);
-        }
-    </style>
 </head>
 <body>
     <div class="picker-container theme-dark" id="pickerContainer">
         <!-- 圆形关闭按钮 -->
-        <button class="close-circle" id="closeCircleBtn">✕</button>
-        
+        <button class="circle-close-btn" id="circleCloseBtn">✕</button>
+
         <div class="picker-header">
             <h3>🎮 游戏运营工具箱</h3>
-            <p>选择类型 → 选择子类型 → 点击文本添加到下方输入框</p>
+            <p>选择文案 → 编辑内容 → 确认发送</p>
         </div>
 
-        <!-- 风格选择器 -->
-        <div class="filter-section">
-            <div class="filter-group">
-                <label>🎨 界面风格</label>
-                <div class="style-buttons" id="styleButtons">
-                    <button data-theme="dark" class="style-btn active">🌙 暗夜</button>
-                    <button data-theme="pink" class="style-btn">🌸 粉嫩</button>
-                    <button data-theme="cyber" class="style-btn">💻 赛博</button>
-                    <button data-theme="white" class="style-btn">📄 简约</button>
-                    <button data-theme="red" class="style-btn">🧧 中国红</button>
+        <!-- 内容面板 -->
+        <div class="content-panel">
+            <div class="panel-header">
+                <span class="panel-title">📝 内容编辑</span>
+            </div>
+            <div class="input-area">
+                <textarea id="contentInput" rows="3" placeholder="选择文案后会自动填入，也可以直接编辑或翻译..."></textarea>
+                <div class="input-actions">
+                    <button id="translateInputBtn" class="action-icon-btn" title="翻译输入框内容">🌐 翻译</button>
+                    <button id="openSettingsBtn" class="action-icon-btn" title="设置">⚙️ 设置</button>
+                    <button id="confirmBtn" class="confirm-btn">✓ 确认发送</button>
                 </div>
             </div>
         </div>
 
-        <!-- 翻译设置面板（默认隐藏） -->
-        <div class="filter-section">
-            <div class="filter-group">
-                <label>
-                    🌐 翻译设置
-                    <button type="button" class="settings-toggle" id="settingsToggleBtn">⚙️ 显示设置</button>
-                </label>
-                <div class="translate-settings-panel" id="translateSettingsPanel">
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-                        <select id="translatorSelect" style="flex: 1; padding: 8px; border-radius: 8px;">
-                            <option value="google">Google 翻译</option>
-                            <option value="baidu">百度翻译</option>
-                            <option value="microsoft">微软翻译</option>
-                        </select>
-                        <select id="langSelect" style="flex: 1; padding: 8px; border-radius: 8px;">
-                            <option value="en">English</option>
-                            <option value="zh">中文</option>
-                            <option value="ja">日本語</option>
-                            <option value="ko">한국어</option>
-                            <option value="fr">Français</option>
-                            <option value="de">Deutsch</option>
-                            <option value="es">Español</option>
-                            <option value="ru">Русский</option>
-                        </select>
-                        <button id="translateToggleBtn" class="style-btn" style="background: #667eea; color: white; padding: 8px 16px;">🔘 开启翻译</button>
-                    </div>
-                    <div id="translateStatus" style="font-size: 11px; color: #888;">
-                        ⚙️ 翻译状态：未启用
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="filter-section">
-            <div class="filter-group">
+        <!-- 条件选择栏 - 一行布局 -->
+        <div class="filter-bar">
+            <div class="filter-item">
                 <label>📌 主类型</label>
                 <select id="mainTypeSelect">
                     <option value="ban">🚫 封号类型</option>
@@ -201,17 +44,18 @@
                 </select>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-item">
                 <label>🔖 子类型</label>
                 <select id="subTypeSelect"></select>
             </div>
 
-            <div class="filter-group">
-                <label>🔍 搜索推荐</label>
-                <input type="text" id="searchInput" class="search-input" placeholder="输入关键词过滤...">
+            <div class="filter-item search-item">
+                <label>🔍 搜索</label>
+                <input type="text" id="searchInput" class="search-input" placeholder="关键词...">
             </div>
         </div>
 
+        <!-- 推荐列表 -->
         <div class="recommend-section">
             <div class="section-title">
                 📋 推荐文案 <span id="resultCount">0</span>
@@ -220,22 +64,93 @@
                 <li class="empty-tip">请选择类型查看推荐</li>
             </ul>
         </div>
+    </div>
 
-        <!-- 选中的内容区域 -->
-        <div class="selected-area">
-            <div class="selected-label">
-                <span>📝 选中的内容</span>
-                <button type="button" id="clearInputBtn" style="background:none; border:none; color:#888; cursor:pointer; font-size:12px;">清空</button>
+    <!-- 设置弹窗（包含翻译设置 + 风格设置） -->
+    <div id="settingsModal" class="settings-modal" style="display: none;">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <span>⚙️ 设置</span>
+                <button id="closeSettingsModalBtn" class="close-modal-btn">✕</button>
             </div>
-            <div class="selected-input-wrapper">
-                <input type="text" id="selectedInput" placeholder="点击上方推荐文案添加到此处...">
-                <button id="translateInputBtn" class="translate-input-btn">🌐 翻译</button>
+            <div class="settings-modal-body">
+                <!-- 标签页切换 -->
+                <div class="settings-tabs">
+                    <button class="tab-btn active" data-tab="translate">🌐 翻译设置</button>
+                    <button class="tab-btn" data-tab="theme">🎨 界面风格</button>
+                </div>
+                
+                <!-- 翻译设置面板 -->
+                <div id="translateTab" class="tab-content active">
+                    <div class="setting-group">
+                        <label>翻译引擎</label>
+                        <select id="translatorSelect">
+                            <option value="google">Google 翻译</option>
+                            <option value="baidu">百度翻译</option>
+                            <option value="microsoft">微软翻译</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>目标语言</label>
+                        <select id="langSelect">
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="ja">日本語</option>
+                            <option value="ko">한국어</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="es">Español</option>
+                            <option value="ru">Русский</option>
+                            <option value="ar">العربية</option>
+                            <option value="pt">Português</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="autoTranslateCheckbox"> 自动翻译选择的文案
+                        </label>
+                    </div>
+                    <div class="setting-group" id="baiduSettings" style="display: none;">
+                        <label>百度 App ID</label>
+                        <input type="text" id="baiduAppId" placeholder="输入百度翻译 App ID">
+                        <label style="margin-top: 8px;">百度密钥</label>
+                        <input type="password" id="baiduSecret" placeholder="输入百度翻译密钥">
+                    </div>
+                    <div class="setting-group" id="microsoftSettings" style="display: none;">
+                        <label>微软 API Key</label>
+                        <input type="password" id="msApiKey" placeholder="输入微软翻译 API Key">
+                        <label style="margin-top: 8px;">区域</label>
+                        <input type="text" id="msRegion" placeholder="global" value="global">
+                    </div>
+                </div>
+                
+                <!-- 风格设置面板 -->
+                <div id="themeTab" class="tab-content">
+                    <div class="setting-group">
+                        <label>选择界面风格</label>
+                        <div class="theme-buttons" id="themeButtons">
+                            <button data-theme="dark" class="theme-option-btn active">🌙 暗夜游戏风</button>
+                            <button data-theme="pink" class="theme-option-btn">🌸 清新少女粉</button>
+                            <button data-theme="cyber" class="theme-option-btn">💻 科技赛博朋克</button>
+                            <button data-theme="white" class="theme-option-btn">📄 简约商务白</button>
+                            <button data-theme="red" class="theme-option-btn">🧧 热血中国红</button>
+                        </div>
+                    </div>
+                    <div class="theme-preview" id="themePreview">
+                        <div class="preview-card">
+                            <span>预览效果</span>
+                            <p>这里会显示主题预览效果</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button id="confirmBtn" class="confirm-btn">✓ 确认发送</button>
+            <div class="settings-modal-footer">
+                <button id="saveSettingsModalBtn" class="save-modal-btn">保存设置</button>
+            </div>
         </div>
     </div>
 
-    <!-- 翻译模块 -->
+    <!-- 翻译模块（必须按顺序） -->
     <script src="js/translators/translator-base.js"></script>
     <script src="js/translators/google-translator.js"></script>
     <script src="js/translators/baidu-translator.js"></script>

@@ -1,6 +1,6 @@
 /**
- * 主逻辑模块
- * 初始化页面、绑定事件、渲染列表、集成翻译
+ * 主逻辑模块 - 优化版
+ * 包含内容面板、设置弹窗、翻译设置、风格设置等
  */
 
 // 等待 DOM 加载完成
@@ -11,17 +11,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('searchInput');
     const optionList = document.getElementById('optionList');
     const resultCount = document.getElementById('resultCount');
-    const closeCircleBtn = document.getElementById('closeCircleBtn');
+    const circleCloseBtn = document.getElementById('circleCloseBtn');
     const confirmBtn = document.getElementById('confirmBtn');
-    const selectedInput = document.getElementById('selectedInput');
-    const clearInputBtn = document.getElementById('clearInputBtn');
+    const contentInput = document.getElementById('contentInput');
     const translateInputBtn = document.getElementById('translateInputBtn');
-    const settingsToggleBtn = document.getElementById('settingsToggleBtn');
-    const translateSettingsPanel = document.getElementById('translateSettingsPanel');
-    const translateToggleBtn = document.getElementById('translateToggleBtn');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+    const saveSettingsModalBtn = document.getElementById('saveSettingsModalBtn');
     const translatorSelect = document.getElementById('translatorSelect');
     const langSelect = document.getElementById('langSelect');
-    const translateStatus = document.getElementById('translateStatus');
+    const autoTranslateCheckbox = document.getElementById('autoTranslateCheckbox');
+    const baiduSettings = document.getElementById('baiduSettings');
+    const microsoftSettings = document.getElementById('microsoftSettings');
+    const baiduAppId = document.getElementById('baiduAppId');
+    const baiduSecret = document.getElementById('baiduSecret');
+    const msApiKey = document.getElementById('msApiKey');
+    const msRegion = document.getElementById('msRegion');
+    
+    // 标签页元素
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
     
     // 当前状态
     let currentSubType = '';
@@ -31,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let translateEnabled = false;
     let translatorEngine = 'google';
     let targetLang = 'en';
+    let autoTranslate = false;
     
     // 缓存翻译结果
     const translationCache = new Map();
@@ -45,46 +56,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     /**
-     * 更新翻译状态显示
+     * 保存设置到 localStorage
      */
-    function updateTranslateStatus() {
-        if (translateStatus) {
-            const engineNames = { google: 'Google', baidu: '百度', microsoft: '微软' };
-            const langNames = {
-                en: '英语', zh: '中文', ja: '日语', ko: '韩语',
-                fr: '法语', de: '德语', es: '西班牙语', ru: '俄语'
-            };
-            const statusText = translateEnabled ? '已启用' : '未启用';
-            const engineText = engineNames[translatorEngine] || translatorEngine;
-            const langText = langNames[targetLang] || targetLang;
-            translateStatus.innerHTML = `⚙️ 翻译状态：${statusText} | 引擎: ${engineText} | 目标语言: ${langText}`;
-        }
+    function saveSettingsToLocal() {
+        localStorage.setItem('translator_engine', translatorEngine);
+        localStorage.setItem('translator_lang', targetLang);
+        localStorage.setItem('translator_auto', autoTranslate);
+        localStorage.setItem('baidu_app_id', baiduAppId?.value || '');
+        localStorage.setItem('baidu_secret', baiduSecret?.value || '');
+        localStorage.setItem('ms_api_key', msApiKey?.value || '');
+        localStorage.setItem('ms_region', msRegion?.value || 'global');
+    }
+    
+    /**
+     * 加载保存的设置
+     */
+    function loadSettingsFromLocal() {
+        translatorEngine = localStorage.getItem('translator_engine') || 'google';
+        targetLang = localStorage.getItem('translator_lang') || 'en';
+        autoTranslate = localStorage.getItem('translator_auto') === 'true';
+        
+        if (translatorSelect) translatorSelect.value = translatorEngine;
+        if (langSelect) langSelect.value = targetLang;
+        if (autoTranslateCheckbox) autoTranslateCheckbox.checked = autoTranslate;
+        
+        if (baiduAppId) baiduAppId.value = localStorage.getItem('baidu_app_id') || '';
+        if (baiduSecret) baiduSecret.value = localStorage.getItem('baidu_secret') || '';
+        if (msApiKey) msApiKey.value = localStorage.getItem('ms_api_key') || '';
+        if (msRegion) msRegion.value = localStorage.getItem('ms_region') || 'global';
+        
+        // 根据引擎显示对应的设置
+        toggleEngineSettings(translatorEngine);
+    }
+    
+    /**
+     * 切换引擎设置面板显示
+     */
+    function toggleEngineSettings(engine) {
+        if (baiduSettings) baiduSettings.style.display = engine === 'baidu' ? 'block' : 'none';
+        if (microsoftSettings) microsoftSettings.style.display = engine === 'microsoft' ? 'block' : 'none';
     }
     
     /**
      * 初始化翻译器
      */
     function initTranslator() {
+        // 从 URL 参数读取覆盖
         const urlParams = new URLSearchParams(window.location.search);
-        translatorEngine = urlParams.get('translator') || urlParams.get('t') || 'google';
-        targetLang = urlParams.get('lang') || urlParams.get('l') || 'en';
+        const urlEngine = urlParams.get('translator') || urlParams.get('t');
+        const urlLang = urlParams.get('lang') || urlParams.get('l');
+        const urlAuto = urlParams.get('translate') === '1' || urlParams.get('auto') === '1';
         
-        // 检查 URL 是否启用翻译
-        const autoTranslate = urlParams.get('translate') === '1' || urlParams.get('auto') === '1';
-        translateEnabled = autoTranslate;
+        if (urlEngine) translatorEngine = urlEngine;
+        if (urlLang) targetLang = urlLang;
+        if (urlAuto) autoTranslate = urlAuto;
         
         // 更新 UI
         if (translatorSelect) translatorSelect.value = translatorEngine;
         if (langSelect) langSelect.value = targetLang;
+        if (autoTranslateCheckbox) autoTranslateCheckbox.checked = autoTranslate;
         
         // 配置翻译管理器
         const config = {};
         if (translatorEngine === 'baidu') {
-            config.appId = urlParams.get('baidu_app_id') || localStorage.getItem('baidu_app_id') || '';
-            config.secret = urlParams.get('baidu_secret') || localStorage.getItem('baidu_secret') || '';
+            config.appId = baiduAppId?.value || localStorage.getItem('baidu_app_id') || '';
+            config.secret = baiduSecret?.value || localStorage.getItem('baidu_secret') || '';
         } else if (translatorEngine === 'microsoft') {
-            config.apiKey = urlParams.get('ms_api_key') || localStorage.getItem('ms_api_key') || '';
-            config.region = urlParams.get('ms_region') || localStorage.getItem('ms_region') || 'global';
+            config.apiKey = msApiKey?.value || localStorage.getItem('ms_api_key') || '';
+            config.region = msRegion?.value || localStorage.getItem('ms_region') || 'global';
         }
         
         if (window.translatorManager) {
@@ -95,19 +134,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
         
-        if (translateToggleBtn) {
-            translateToggleBtn.textContent = translateEnabled ? '🔘 关闭翻译' : '🔘 开启翻译';
-        }
-        
-        updateTranslateStatus();
+        translateEnabled = autoTranslate;
     }
     
     /**
      * 翻译文本（带缓存）
      */
     async function translateWithCache(text) {
-        if (!translateEnabled) return text;
-        if (!text || text.trim() === '') return text;
+        if (!translateEnabled || !text || text.trim() === '') return text;
         
         const cacheKey = `${text}_${targetLang}_${translatorEngine}`;
         if (translationCache.has(cacheKey)) {
@@ -118,7 +152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const translated = await window.translatorManager.translate(text);
             translationCache.set(cacheKey, translated);
             
-            // 限制缓存大小
             if (translationCache.size > 200) {
                 const firstKey = translationCache.keys().next().value;
                 translationCache.delete(firstKey);
@@ -135,31 +168,27 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 翻译输入框内容
      */
     async function translateInputContent() {
-        const originalText = selectedInput.value.trim();
-        if (!originalText) {
-            alert('请先选择或输入内容');
+        const originalText = contentInput.value;
+        if (!originalText || originalText.trim() === '') {
+            contentInput.placeholder = '请先输入要翻译的内容';
             return;
         }
         
-        if (!translateEnabled) {
-            alert('请先在翻译设置中开启翻译功能');
-            settingsToggleBtn.click(); // 自动展开设置面板
-            return;
-        }
-        
-        // 显示加载状态
-        const originalBtnText = translateInputBtn.textContent;
-        translateInputBtn.textContent = '⏳ 翻译中...';
+        const originalBtnText = translateInputBtn.innerHTML;
+        translateInputBtn.innerHTML = '<span class="loading-spinner"></span>翻译中...';
         translateInputBtn.disabled = true;
         
         try {
+            const wasEnabled = translateEnabled;
+            translateEnabled = true;
             const translated = await translateWithCache(originalText);
-            selectedInput.value = translated;
+            contentInput.value = translated;
+            translateEnabled = wasEnabled;
         } catch (error) {
             console.error('翻译失败:', error);
-            alert('翻译失败，请重试');
+            contentInput.placeholder = '翻译失败，请检查网络或设置';
         } finally {
-            translateInputBtn.textContent = originalBtnText;
+            translateInputBtn.innerHTML = originalBtnText;
             translateInputBtn.disabled = false;
         }
     }
@@ -180,49 +209,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const typeName = categoryNames[currentMainType] || '';
         
-        // 显示加载状态
-        if (translateEnabled) {
+        if (autoTranslate && translateEnabled) {
             optionList.innerHTML = '<li class="empty-tip">🔄 加载翻译中...</li>';
         }
         
-        // 批量翻译
         let translatedTexts = items.map(item => item.text);
-        if (translateEnabled) {
+        if (autoTranslate && translateEnabled) {
             translatedTexts = await Promise.all(items.map(item => translateWithCache(item.text)));
         }
         
         optionList.innerHTML = items.map((item, index) => `
             <li data-id="${item.id}" data-text="${escapeHtml(item.text)}">
                 <div style="flex:1">
-                    <div style="margin-bottom: 4px;">${escapeHtml(translatedTexts[index])}</div>
-                    ${translateEnabled ? `<div style="font-size: 11px; opacity: 0.6;">原文: ${escapeHtml(item.text)}</div>` : ''}
+                    <div style="margin-bottom: 4px;">${escapeHtml(autoTranslate && translateEnabled ? translatedTexts[index] : item.text)}</div>
+                    ${(autoTranslate && translateEnabled) ? `<div style="font-size: 11px; opacity: 0.6;">原文: ${escapeHtml(item.text)}</div>` : ''}
                 </div>
                 <span class="badge">${typeName}</span>
             </li>
         `).join('');
         
-        // 绑定点击事件 - 添加到输入框（不关闭）
         document.querySelectorAll('.option-list li[data-text]').forEach(li => {
             li.addEventListener('click', () => {
                 const originalText = li.getAttribute('data-text');
-                // 添加到输入框
-                selectedInput.value = originalText;
-                // 可选：添加视觉反馈
-                li.style.backgroundColor = 'rgba(102, 126, 234, 0.3)';
+                const displayDiv = li.querySelector('div:first-child div:first-child');
+                const displayText = displayDiv ? displayDiv.textContent.trim() : originalText;
+                contentInput.value = displayText;
+                contentInput.style.backgroundColor = 'rgba(102, 126, 234, 0.2)';
                 setTimeout(() => {
-                    li.style.backgroundColor = '';
-                }, 200);
+                    contentInput.style.backgroundColor = '';
+                }, 300);
             });
         });
     }
     
     /**
-     * 确认发送
+     * 确认发送内容
      */
     function confirmAndSend() {
-        const content = selectedInput.value.trim();
-        if (!content) {
-            alert('请先选择或输入内容');
+        const textToSend = contentInput.value;
+        if (!textToSend || textToSend.trim() === '') {
+            contentInput.placeholder = '请先选择或输入内容';
+            contentInput.style.borderColor = '#ff6b6b';
+            setTimeout(() => {
+                contentInput.style.borderColor = '';
+            }, 1000);
             return;
         }
         
@@ -231,22 +261,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             sub: currentSubType
         };
         
-        // 发送消息
-        PostMessage.sendSelectedText(content, category, {
-            original: content,
-            translated: content  // 如果启用了翻译，这里可以传翻译后的
+        PostMessage.sendSelectedText(textToSend, category, {
+            original: textToSend,
+            translated: textToSend,
+            fromEditor: true
         });
         
-        // 关闭选择器
         PostMessage.sendClose();
-    }
-    
-    /**
-     * 清空输入框
-     */
-    function clearInput() {
-        selectedInput.value = '';
-        selectedInput.focus();
     }
     
     /**
@@ -257,11 +278,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     /**
-     * 切换翻译设置面板
+     * 显示/隐藏设置弹窗
      */
-    function toggleSettingsPanel() {
-        translateSettingsPanel.classList.toggle('show');
-        settingsToggleBtn.textContent = translateSettingsPanel.classList.contains('show') ? '🔒 隐藏设置' : '⚙️ 显示设置';
+    function toggleSettingsModal(show) {
+        if (settingsModal) {
+            settingsModal.style.display = show ? 'flex' : 'none';
+        }
+    }
+    
+    /**
+     * 保存所有设置
+     */
+    function saveAllSettings() {
+        // 保存翻译设置
+        translatorEngine = translatorSelect.value;
+        targetLang = langSelect.value;
+        autoTranslate = autoTranslateCheckbox.checked;
+        
+        saveSettingsToLocal();
+        
+        // 重新初始化翻译器
+        const config = {};
+        if (translatorEngine === 'baidu') {
+            config.appId = baiduAppId?.value || '';
+            config.secret = baiduSecret?.value || '';
+        } else if (translatorEngine === 'microsoft') {
+            config.apiKey = msApiKey?.value || '';
+            config.region = msRegion?.value || 'global';
+        }
+        
+        if (window.translatorManager) {
+            window.translatorManager.init({
+                engine: translatorEngine,
+                targetLang: targetLang,
+                config: config
+            });
+        }
+        
+        translateEnabled = autoTranslate;
+        translationCache.clear();
+        
+        // 重新渲染推荐列表
+        renderRecommendations();
+        
+        // 关闭设置弹窗
+        toggleSettingsModal(false);
+    }
+    
+    /**
+     * 切换标签页
+     */
+    function switchTab(tabId) {
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        tabBtns.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const targetContent = document.getElementById(`${tabId}Tab`);
+        if (targetContent) targetContent.classList.add('active');
+        
+        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
     }
     
     /**
@@ -309,9 +388,9 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 初始化主题管理器
      */
     function initTheme() {
-        const container = document.getElementById('pickerContainer');
-        if (container && window.ThemeManager) {
-            window.ThemeManager.init(container);
+        if (window.ThemeManager) {
+            window.ThemeManager.init();
+            window.ThemeManager.bindThemeButtons();
         }
     }
     
@@ -322,87 +401,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         PostMessage.listenToParent((data) => {
             if (data?.type === 'CLOSE_PICKER') {
                 closePicker();
+            } else if (data?.type === 'GET_TRANSLATE_STATUS') {
+                PostMessage.sendTranslateStatus(translateEnabled, translatorEngine, targetLang);
             }
         });
     }
     
     /**
-     * 绑定翻译控件事件
-     */
-    function bindTranslateEvents() {
-        if (translatorSelect) {
-            translatorSelect.addEventListener('change', async (e) => {
-                translatorEngine = e.target.value;
-                
-                const config = {};
-                if (translatorEngine === 'baidu') {
-                    config.appId = localStorage.getItem('baidu_app_id') || '';
-                    config.secret = localStorage.getItem('baidu_secret') || '';
-                } else if (translatorEngine === 'microsoft') {
-                    config.apiKey = localStorage.getItem('ms_api_key') || '';
-                    config.region = localStorage.getItem('ms_region') || 'global';
-                }
-                
-                if (window.translatorManager) {
-                    window.translatorManager.init({
-                        engine: translatorEngine,
-                        targetLang: targetLang,
-                        config: config
-                    });
-                }
-                
-                translationCache.clear();
-                if (translateEnabled) {
-                    await renderRecommendations();
-                }
-                updateTranslateStatus();
-            });
-        }
-        
-        if (langSelect) {
-            langSelect.addEventListener('change', async (e) => {
-                targetLang = e.target.value;
-                if (window.translatorManager) {
-                    window.translatorManager.setTargetLanguage(targetLang);
-                }
-                translationCache.clear();
-                if (translateEnabled) {
-                    await renderRecommendations();
-                }
-                updateTranslateStatus();
-            });
-        }
-        
-        if (translateToggleBtn) {
-            translateToggleBtn.addEventListener('click', async () => {
-                translateEnabled = !translateEnabled;
-                translateToggleBtn.textContent = translateEnabled ? '🔘 关闭翻译' : '🔘 开启翻译';
-                translationCache.clear();
-                await renderRecommendations();
-                updateTranslateStatus();
-                
-                // 通知父页面翻译状态变化
-                PostMessage.sendTranslateStatus(translateEnabled, translatorEngine, targetLang);
-            });
-        }
-    }
-    
-    /**
-     * 绑定其他事件
+     * 绑定所有事件
      */
     function bindEvents() {
-        // 主类型变化
         mainTypeSelect.addEventListener('change', () => {
             populateSubTypes();
         });
         
-        // 子类型变化
         subTypeSelect.addEventListener('change', (e) => {
             currentSubType = e.target.value;
             renderRecommendations();
         });
         
-        // 搜索输入（防抖）
         let searchTimeout;
         searchInput.addEventListener('input', () => {
             clearTimeout(searchTimeout);
@@ -411,20 +428,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 300);
         });
         
-        // 圆形关闭按钮
-        closeCircleBtn.addEventListener('click', closePicker);
+        if (circleCloseBtn) {
+            circleCloseBtn.addEventListener('click', closePicker);
+        }
         
-        // 确认按钮
-        confirmBtn.addEventListener('click', confirmAndSend);
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', confirmAndSend);
+        }
         
-        // 清空输入框
-        clearInputBtn.addEventListener('click', clearInput);
+        if (translateInputBtn) {
+            translateInputBtn.addEventListener('click', translateInputContent);
+        }
         
-        // 翻译输入框按钮
-        translateInputBtn.addEventListener('click', translateInputContent);
+        if (openSettingsBtn) {
+            openSettingsBtn.addEventListener('click', () => toggleSettingsModal(true));
+        }
         
-        // 翻译设置面板切换
-        settingsToggleBtn.addEventListener('click', toggleSettingsPanel);
+        if (closeSettingsModalBtn) {
+            closeSettingsModalBtn.addEventListener('click', () => toggleSettingsModal(false));
+        }
+        
+        if (saveSettingsModalBtn) {
+            saveSettingsModalBtn.addEventListener('click', saveAllSettings);
+        }
+        
+        // 点击弹窗外部关闭
+        if (settingsModal) {
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    toggleSettingsModal(false);
+                }
+            });
+        }
+        
+        // 标签页切换
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                if (tabId) switchTab(tabId);
+            });
+        });
+        
+        // 引擎切换时显示对应设置
+        if (translatorSelect) {
+            translatorSelect.addEventListener('change', (e) => {
+                toggleEngineSettings(e.target.value);
+            });
+        }
     }
     
     /**
@@ -448,19 +498,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function init() {
         showLoadingState();
         
-        // 初始化主题
         initTheme();
-        
-        // 初始化消息监听
         initMessageListener();
-        
-        // 初始化翻译
+        loadSettingsFromLocal();
         initTranslator();
+        bindEvents();
         
-        // 绑定翻译控件事件
-        bindTranslateEvents();
-        
-        // 加载数据
         const result = await DataLoader.loadData();
         
         if (!result.success) {
@@ -468,18 +511,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        // 绑定其他事件
-        bindEvents();
-        
-        // 填充子类型
         populateSubTypes();
-        
-        // 默认隐藏翻译设置面板
-        if (translateSettingsPanel) {
-            translateSettingsPanel.classList.remove('show');
-        }
     }
     
-    // 启动应用
     init();
 });
