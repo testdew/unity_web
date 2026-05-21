@@ -16,12 +16,20 @@ body {
 /* ==================== 基础容器样式 ==================== */
 .picker-container {
     position: relative;
-    width: 720px;
-    max-width: 95vw;
+    width: 680px;
+    max-width: 90vw;
+    min-width: 560px;
     border-radius: 24px;
     padding: 24px;
     transition: all 0.3s ease;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 620px) {
+    .picker-container {
+        min-width: auto;
+        width: calc(100vw - 32px);
+    }
 }
 
 .picker-header {
@@ -140,18 +148,36 @@ body {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* ==================== 条件选择栏 - 强制一行显示 ==================== */
+/* ==================== 条件选择栏 - 强制一行布局 ==================== */
 .filter-bar {
     display: flex;
     gap: 12px;
     margin-bottom: 20px;
     flex-wrap: nowrap;
-    align-items: flex-end;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 4px;
+}
+
+.filter-bar::-webkit-scrollbar {
+    height: 4px;
+}
+
+.filter-bar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.filter-bar::-webkit-scrollbar-thumb {
+    background: currentColor;
+    border-radius: 4px;
+    opacity: 0.5;
 }
 
 .filter-item {
     flex: 1;
-    min-width: 0;
+    min-width: 120px;
 }
 
 .filter-item label {
@@ -167,7 +193,7 @@ body {
 .filter-item select,
 .filter-item .search-input {
     width: 100%;
-    padding: 10px 8px;
+    padding: 10px 12px;
     border-radius: 12px;
     font-size: 13px;
     cursor: pointer;
@@ -175,13 +201,6 @@ body {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: inherit;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.filter-item select option {
-    white-space: normal;
 }
 
 .filter-item select:focus,
@@ -192,16 +211,41 @@ body {
 
 .search-item {
     flex: 1.2;
+    min-width: 130px;
 }
 
-/* 响应式：当屏幕过小时，缩小间距和字体 */
-@media (max-width: 580px) {
+/* 窄屏幕适配 - 保持一行但允许滚动 */
+@media (max-width: 650px) {
     .filter-bar {
         gap: 8px;
     }
     
+    .filter-item {
+        min-width: 105px;
+    }
+    
+    .search-item {
+        min-width: 115px;
+    }
+    
+    .filter-item select,
+    .filter-item .search-input {
+        padding: 8px 8px;
+        font-size: 12px;
+    }
+    
     .filter-item label {
-        font-size: 9px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 550px) {
+    .filter-item {
+        min-width: 95px;
+    }
+    
+    .search-item {
+        min-width: 105px;
     }
     
     .filter-item select,
@@ -211,19 +255,13 @@ body {
     }
 }
 
-@media (max-width: 500px) {
-    .filter-bar {
-        gap: 6px;
+@media (max-width: 480px) {
+    .filter-item {
+        min-width: 85px;
     }
     
-    .filter-item label {
-        font-size: 8px;
-    }
-    
-    .filter-item select,
-    .filter-item .search-input {
-        padding: 6px 4px;
-        font-size: 10px;
+    .search-item {
+        min-width: 95px;
     }
 }
 
@@ -840,6 +878,7 @@ body {
 @media (max-width: 600px) {
     .picker-container {
         padding: 16px;
+        width: 95vw;
     }
     
     .input-actions {
