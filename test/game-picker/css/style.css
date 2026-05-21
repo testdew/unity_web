@@ -16,8 +16,8 @@ body {
 /* ==================== 基础容器样式 ==================== */
 .picker-container {
     position: relative;
-    width: 680px;
-    max-width: 90vw;
+    width: 720px;
+    max-width: 95vw;
     border-radius: 24px;
     padding: 24px;
     transition: all 0.3s ease;
@@ -140,12 +140,13 @@ body {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* ==================== 条件选择栏 - 一行布局 ==================== */
+/* ==================== 条件选择栏 - 强制一行显示 ==================== */
 .filter-bar {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 20px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    align-items: flex-end;
 }
 
 .filter-item {
@@ -160,12 +161,13 @@ body {
     letter-spacing: 1px;
     font-weight: 500;
     opacity: 0.8;
+    white-space: nowrap;
 }
 
 .filter-item select,
 .filter-item .search-input {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 8px;
     border-radius: 12px;
     font-size: 13px;
     cursor: pointer;
@@ -173,6 +175,13 @@ body {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-item select option {
+    white-space: normal;
 }
 
 .filter-item select:focus,
@@ -183,6 +192,39 @@ body {
 
 .search-item {
     flex: 1.2;
+}
+
+/* 响应式：当屏幕过小时，缩小间距和字体 */
+@media (max-width: 580px) {
+    .filter-bar {
+        gap: 8px;
+    }
+    
+    .filter-item label {
+        font-size: 9px;
+    }
+    
+    .filter-item select,
+    .filter-item .search-input {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 500px) {
+    .filter-bar {
+        gap: 6px;
+    }
+    
+    .filter-item label {
+        font-size: 8px;
+    }
+    
+    .filter-item select,
+    .filter-item .search-input {
+        padding: 6px 4px;
+        font-size: 10px;
+    }
 }
 
 /* ==================== 推荐列表 ==================== */
@@ -798,16 +840,6 @@ body {
 @media (max-width: 600px) {
     .picker-container {
         padding: 16px;
-        width: 95vw;
-    }
-    
-    .filter-bar {
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .filter-item {
-        width: 100%;
     }
     
     .input-actions {
