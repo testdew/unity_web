@@ -1,62 +1,92 @@
 /**
- * 翻译管理器
- * 统一管理多个翻译引擎，支持切换和降级
+ * 翻译管理器 - 修复参数传递
  */
 
 class TranslatorManager {
     constructor() {
-        this.translators = [];
+        this.translators = {};
         this.currentTranslator = null;
-        this.defaultTranslator = 'google';
         this.targetLanguage = 'en';
+        this.engine = 'google';
+    }
+
+    register(name, translatorClass) {
+        this.translators[name] = translatorClass;
     }
 
     /**
-     * 注册翻译引擎
+     * 从 URL 读取所有配置
      */
-    registerTranslator(translator) {
-        this.translators.push(translator);
-    }
-
-    /**
-     * 初始化翻译器
-     */
-    init(options = {}) {
-        const { engine = 'google', targetLang = 'en', config = {} } = options;
+    loadConfigFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
         
-        this.targetLanguage = targetLang;
+        // 读取引擎
+        this.engine = urlParams.get('translator') || urlParams.get('t') || 'google';
         
-        console.log('初始化翻译器:', engine, targetLang, config);
+        // 读取目标语言
+        this.targetLanguage = urlParams.get('lang') || urlParams.get('l') || 'en';
         
-        // 获取翻译引擎类
-        const TranslatorClass = this.getTranslatorClass(engine);
-        
-        if (TranslatorClass) {
-            this.currentTranslator = new TranslatorClass(config);
-            console.log(`翻译引擎 ${engine} 初始化完成，可用: ${this.currentTranslator.isAvailable()}`);
-        } else {
-            console.warn(`未找到翻译引擎: ${engine}，使用默认 Google 翻译`);
-            this.currentTranslator = new GoogleTranslator();
+        // 读取自动翻译
+        const autoTranslate = urlParams.get('translate') === '1' || urlParams.get('auto') === '1';
+        if (autoTranslate) {
+            localStorage.setItem('translator_auto', 'true');
         }
         
-        return this.currentTranslator;
+        // 读取百度配置并保存到 localStorage
+        const baiduAppId = urlParams.get('baidu_app_id') || urlParams.get('baiduAppId');
+        const baiduSecret = urlParams.get('baidu_secret') || urlParams.get('baiduSecret');
+        if (baiduAppId) {
+            localStorage.setItem('baidu_app_id', baiduAppId);
+            console.log('已保存百度 AppId');
+        }
+        if (baiduSecret) {
+            localStorage.setItem('baidu_secret', baiduSecret);
+            console.log('已保存百度 Secret');
+        }
+        
+        // 读取微软配置
+        const msApiKey = urlParams.get('ms_api_key') || urlParams.get('msApiKey');
+        const msRegion = urlParams.get('ms_region') || urlParams.get('msRegion');
+        if (msApiKey) localStorage.setItem('ms_api_key', msApiKey);
+        if (msRegion) localStorage.setItem('ms_region', msRegion);
+        
+        console.log('配置加载完成:', {
+            engine: this.engine,
+            targetLang: this.targetLanguage,
+            hasBaiduConfig: !!(localStorage.getItem('baidu_app_id') && localStorage.getItem('baidu_secret'))
+        });
     }
 
-    /**
-     * 获取翻译引擎类
-     */
-    getTranslatorClass(engine) {
-        const engines = {
-            'google': GoogleTranslator,
-            'baidu': BaiduTranslator,
-            'microsoft': MicrosoftTranslator
+    init(options = {}) {
+        // 先从 URL 加载配置
+        this.loadConfigFromURL();
+        
+        // 合并传入的 options（优先级更高）
+        this.engine = options.engine || this.engine;
+        this.targetLanguage = options.targetLang || this.targetLanguage;
+        
+        // 构建配置对象，传入翻译器
+        const config = {
+            appId: options.appId || localStorage.getItem('baidu_app_id') || '',
+            secret: options.secret || localStorage.getItem('baidu_secret') || '',
+            apiKey: options.apiKey || localStorage.getItem('ms_api_key') || '',
+            region: options.region || localStorage.getItem('ms_region') || 'global'
         };
-        return engines[engine];
+        
+        // 创建翻译器实例
+        const TranslatorClass = this.translators[this.engine];
+        if (TranslatorClass) {
+            this.currentTranslator = new TranslatorClass(config);
+            console.log(`翻译器已初始化: ${this.engine}`);
+        } else {
+            console.warn(`未找到翻译引擎: ${this.engine}`);
+            if (this.translators['google']) {
+                this.currentTranslator = new this.translators['google']();
+                console.log('降级使用 Google 翻译');
+            }
+        }
     }
 
-    /**
-     * 翻译文本
-     */
     async translate(text) {
         if (!this.currentTranslator) {
             console.warn('翻译器未初始化');
@@ -64,47 +94,25 @@ class TranslatorManager {
         }
         
         try {
-            const translated = await this.currentTranslator.translate(text, this.targetLanguage);
-            return translated;
+            const result = await this.currentTranslator.translate(text, this.targetLanguage);
+            return result;
         } catch (error) {
             console.error('翻译失败:', error);
             return text;
         }
     }
 
-    /**
-     * 批量翻译
-     */
-    async translateBatch(texts) {
-        const results = await Promise.all(texts.map(text => this.translate(text)));
-        return results;
-    }
-
-    /**
-     * 设置目标语言
-     */
     setTargetLanguage(lang) {
         this.targetLanguage = lang;
-        if (this.currentTranslator && this.currentTranslator.setTargetLanguage) {
-            this.currentTranslator.setTargetLanguage(lang);
-        }
+        localStorage.setItem('translator_lang', lang);
     }
 
-    /**
-     * 获取当前语言
-     */
-    getTargetLanguage() {
-        return this.targetLanguage;
-    }
-
-    /**
-     * 切换翻译引擎
-     */
     switchEngine(engine, config = {}) {
-        const TranslatorClass = this.getTranslatorClass(engine);
+        const TranslatorClass = this.translators[engine];
         if (TranslatorClass) {
+            this.engine = engine;
             this.currentTranslator = new TranslatorClass(config);
-            console.log(`已切换到 ${engine} 翻译引擎`);
+            localStorage.setItem('translator_engine', engine);
             return true;
         }
         return false;
@@ -114,53 +122,21 @@ class TranslatorManager {
 // 创建全局单例
 window.translatorManager = new TranslatorManager();
 
-// 从 URL 参数读取配置
-function initTranslatorFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    // 支持多种参数名
-    const engine = urlParams.get('translator') || urlParams.get('t') || 'google';
-    const targetLang = urlParams.get('lang') || urlParams.get('l') || 'en';
-    const baiduAppId = urlParams.get('baidu_app_id') || urlParams.get('appid') || '';
-    const baiduSecret = urlParams.get('baidu_secret') || urlParams.get('secret') || '';
-    const msApiKey = urlParams.get('ms_api_key') || urlParams.get('key') || '';
-    const msRegion = urlParams.get('ms_region') || urlParams.get('region') || 'global';
-    
-    console.log('URL参数解析:', { engine, targetLang, baiduAppId: !!baiduAppId, baiduSecret: !!baiduSecret });
-    
-    // 保存到 localStorage
-    if (baiduAppId) localStorage.setItem('baidu_app_id', baiduAppId);
-    if (baiduSecret) localStorage.setItem('baidu_secret', baiduSecret);
-    if (msApiKey) localStorage.setItem('ms_api_key', msApiKey);
-    if (msRegion) localStorage.setItem('ms_region', msRegion);
-    
-    const config = {};
-    if (engine === 'baidu') {
-        config.appId = baiduAppId || localStorage.getItem('baidu_app_id');
-        config.secret = baiduSecret || localStorage.getItem('baidu_secret');
-    } else if (engine === 'microsoft') {
-        config.apiKey = msApiKey || localStorage.getItem('ms_api_key');
-        config.region = msRegion || localStorage.getItem('ms_region');
+// 注册翻译引擎
+function registerTranslators() {
+    if (typeof GoogleTranslator !== 'undefined') {
+        window.translatorManager.register('google', GoogleTranslator);
     }
-    
-    const translator = window.translatorManager.init({
-        engine: engine,
-        targetLang: targetLang,
-        config: config
-    });
-    
-    return { engine, targetLang, translator };
+    if (typeof BaiduTranslator !== 'undefined') {
+        window.translatorManager.register('baidu', BaiduTranslator);
+    }
+    if (typeof MicrosoftTranslator !== 'undefined') {
+        window.translatorManager.register('microsoft', MicrosoftTranslator);
+    }
 }
 
-// 自动初始化
-if (typeof window !== 'undefined') {
-    // 等待所有脚本加载完成
-    window.addEventListener('load', () => {
-        initTranslatorFromURL();
-    });
-}
-
-// 导出
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { TranslatorManager, initTranslatorFromURL };
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', registerTranslators);
+} else {
+    registerTranslators();
 }
