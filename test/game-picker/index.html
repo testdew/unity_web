@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏运营选择器 - 多风格版</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="picker-container theme-dark" id="pickerContainer">
+        <div class="picker-header">
+            <h3>🎮 游戏运营工具箱</h3>
+            <p>选择类型 → 选择子类型 → 点击文本快速填入</p>
+        </div>
+
+        <!-- 风格选择器 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label>🎨 界面风格</label>
+                <div class="style-buttons" id="styleButtons">
+                    <button data-theme="dark" class="style-btn active">🌙 暗夜</button>
+                    <button data-theme="pink" class="style-btn">🌸 粉嫩</button>
+                    <button data-theme="cyber" class="style-btn">💻 赛博</button>
+                    <button data-theme="white" class="style-btn">📄 简约</button>
+                    <button data-theme="red" class="style-btn">🧧 中国红</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label>📌 主类型</label>
+                <select id="mainTypeSelect">
+                    <option value="ban">🚫 封号类型</option>
+                    <option value="announcement">📢 停服公告</option>
+                    <option value="notice">ℹ️ 系统通知</option>
+                    <option value="reward">🎁 补偿公告</option>
+                    <option value="maintenance">🔧 维护公告</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>🔖 子类型</label>
+                <select id="subTypeSelect"></select>
+            </div>
+
+            <div class="filter-group">
+                <label>🔍 搜索推荐</label>
+                <input type="text" id="searchInput" class="search-input" placeholder="输入关键词过滤...">
+            </div>
+        </div>
+
+        <div class="recommend-section">
+            <div class="section-title">
+                📋 推荐文案 <span id="resultCount">0</span>
+            </div>
+            <ul class="option-list" id="optionList">
+                <li class="empty-tip">请选择类型查看推荐</li>
+            </ul>
+        </div>
+
+        <button class="close-btn" id="closeBtn">✖ 关闭选择器</button>
+    </div>
+
+    <!-- 加载脚本模块 -->
+    <script src="js/theme-manager.js"></script>
+    <script src="js/post-message.js"></script>
+    <script src="js/data-loader.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

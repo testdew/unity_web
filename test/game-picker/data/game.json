@@ -1,0 +1,825 @@
+{
+  "_schema": {
+    "version": "1.0.0",
+    "description": "游戏运营文案数据",
+    "fields": [
+      {
+        "name": "id",
+        "label": "ID",
+        "type": "number",
+        "required": true,
+        "description": "唯一标识符"
+      },
+      {
+        "name": "category",
+        "label": "主分类",
+        "type": "string",
+        "required": true,
+        "options": ["ban", "announcement", "notice", "reward", "maintenance"],
+        "optionsLabels": {
+          "ban": "封号类型",
+          "announcement": "停服公告",
+          "notice": "系统通知",
+          "reward": "补偿公告",
+          "maintenance": "维护公告"
+        }
+      },
+      {
+        "name": "subCategory",
+        "label": "子分类",
+        "type": "string",
+        "required": true,
+        "description": "对应主分类下的细分类型"
+      },
+      {
+        "name": "text",
+        "label": "文案内容",
+        "type": "textarea",
+        "required": true,
+        "description": "实际显示的文本内容"
+      },
+      {
+        "name": "tags",
+        "label": "标签",
+        "type": "array",
+        "required": false,
+        "description": "用于搜索的关键词标签"
+      },
+      {
+        "name": "priority",
+        "label": "优先级",
+        "type": "number",
+        "required": false,
+        "default": 0,
+        "description": "数值越大，推荐排序越靠前"
+      },
+      {
+        "name": "enabled",
+        "label": "启用状态",
+        "type": "boolean",
+        "required": false,
+        "default": true,
+        "description": "是否在前端显示"
+      },
+      {
+        "name": "createdAt",
+        "label": "创建时间",
+        "type": "string",
+        "required": false,
+        "description": "ISO 8601 格式时间"
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": 1,
+      "category": "ban",
+      "subCategory": "永久封禁",
+      "text": "使用外挂/脚本，帐号已被永久封禁",
+      "tags": ["外挂", "脚本", "永久", "封号"],
+      "priority": 10,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "category": "ban",
+      "subCategory": "永久封禁",
+      "text": "恶意刷取游戏资源，永久封停处理",
+      "tags": ["刷资源", "恶意", "永久", "封号"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "category": "ban",
+      "subCategory": "永久封禁",
+      "text": "发布违规言论/政治敏感内容，永久封号",
+      "tags": ["违规言论", "政治", "敏感", "封号"],
+      "priority": 10,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 4,
+      "category": "ban",
+      "subCategory": "永久封禁",
+      "text": "非法交易/盗号行为，帐号永久冻结",
+      "tags": ["非法交易", "盗号", "冻结", "封号"],
+      "priority": 10,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 5,
+      "category": "ban",
+      "subCategory": "永久封禁",
+      "text": "多次违规警告无效，帐号永久封禁",
+      "tags": ["多次违规", "警告", "永久", "封号"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 6,
+      "category": "ban",
+      "subCategory": "临时封禁",
+      "text": "挂机/消极游戏，封禁3天",
+      "tags": ["挂机", "消极", "临时", "3天"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 7,
+      "category": "ban",
+      "subCategory": "临时封禁",
+      "text": "言语辱骂/骚扰他人，封禁7天",
+      "tags": ["辱骂", "骚扰", "临时", "7天"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 8,
+      "category": "ban",
+      "subCategory": "临时封禁",
+      "text": "恶意组队/演员行为，封禁15天",
+      "tags": ["恶意组队", "演员", "临时", "15天"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 9,
+      "category": "ban",
+      "subCategory": "临时封禁",
+      "text": "利用BUG获利，封禁30天",
+      "tags": ["BUG", "获利", "临时", "30天"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 10,
+      "category": "ban",
+      "subCategory": "临时封禁",
+      "text": "多次举报核实，封禁90天",
+      "tags": ["举报", "核实", "临时", "90天"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 11,
+      "category": "ban",
+      "subCategory": "功能限制",
+      "text": "限制发言权限7天",
+      "tags": ["发言", "禁言", "限制", "7天"],
+      "priority": 5,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 12,
+      "category": "ban",
+      "subCategory": "功能限制",
+      "text": "限制交易功能30天",
+      "tags": ["交易", "限制", "30天"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 13,
+      "category": "ban",
+      "subCategory": "功能限制",
+      "text": "限制添加好友14天",
+      "tags": ["好友", "添加", "限制", "14天"],
+      "priority": 4,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 14,
+      "category": "ban",
+      "subCategory": "功能限制",
+      "text": "限制组队功能7天",
+      "tags": ["组队", "限制", "7天"],
+      "priority": 5,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 15,
+      "category": "ban",
+      "subCategory": "功能限制",
+      "text": "限制世界频道发言30天",
+      "tags": ["世界频道", "发言", "限制", "30天"],
+      "priority": 5,
+      "enabled": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": 16,
+      "category": "announcement",
+      "subCategory": "全服停服",
+      "text": "【停服公告】全服将于8月20日02:00-06:00停服维护，届时无法登录",
+      "tags": ["停服", "维护", "全服", "公告"],
+      "priority": 10,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 17,
+      "category": "announcement",
+      "subCategory": "全服停服",
+      "text": "【紧急停服】因服务器异常，全服将于今日14:00紧急停服修复",
+      "tags": ["紧急", "停服", "服务器", "异常"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 18,
+      "category": "announcement",
+      "subCategory": "全服停服",
+      "text": "【版本更新】全服停服更新v3.2.0，停服时间8月25日01:00-08:00",
+      "tags": ["版本更新", "停服", "v3.2.0"],
+      "priority": 10,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 19,
+      "category": "announcement",
+      "subCategory": "全服停服",
+      "text": "【数据迁移】全服停服8小时进行数据迁移，补偿后续发放",
+      "tags": ["数据迁移", "停服", "补偿"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 20,
+      "category": "announcement",
+      "subCategory": "全服停服",
+      "text": "【机房升级】全服停服维护，预计停服时间7月30日03:00-07:00",
+      "tags": ["机房", "升级", "停服", "维护"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 21,
+      "category": "announcement",
+      "subCategory": "部分停服",
+      "text": "iOS区服停服维护，安卓不受影响",
+      "tags": ["iOS", "停服", "部分"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 22,
+      "category": "announcement",
+      "subCategory": "部分停服",
+      "text": "1-100服停服更新，新服正常开放",
+      "tags": ["区服", "部分", "停服", "更新"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 23,
+      "category": "announcement",
+      "subCategory": "部分停服",
+      "text": "联运渠道服停服，官服正常",
+      "tags": ["联运", "渠道", "部分", "停服"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 24,
+      "category": "announcement",
+      "subCategory": "部分停服",
+      "text": "抢先体验服停服维护，正式服正常",
+      "tags": ["体验服", "抢先", "部分", "停服"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 25,
+      "category": "announcement",
+      "subCategory": "部分停服",
+      "text": "微信区停服，QQ区正常开放",
+      "tags": ["微信", "QQ", "部分", "停服"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 26,
+      "category": "announcement",
+      "subCategory": "延迟开服",
+      "text": "【延迟开服】维护时间延长2小时，开服时间调整为10:00",
+      "tags": ["延迟", "开服", "延长"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 27,
+      "category": "announcement",
+      "subCategory": "延迟开服",
+      "text": "【延迟公告】开服时间待定，请留意后续通知",
+      "tags": ["延迟", "待定", "公告"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 28,
+      "category": "announcement",
+      "subCategory": "延迟开服",
+      "text": "【紧急通知】维护延长，预计12:00开服",
+      "tags": ["紧急", "延迟", "开服"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 29,
+      "category": "announcement",
+      "subCategory": "延迟开服",
+      "text": "【延迟说明】因技术问题，开服延迟至18:00",
+      "tags": ["技术问题", "延迟", "开服"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 30,
+      "category": "announcement",
+      "subCategory": "延迟开服",
+      "text": "【补偿公告】延迟开服2小时，全服补偿钻石*500",
+      "tags": ["补偿", "延迟", "钻石"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-02-10T00:00:00Z"
+    },
+    {
+      "id": 31,
+      "category": "notice",
+      "subCategory": "活动通知",
+      "text": "【限时活动】双倍经验卡限时上架，仅售3天",
+      "tags": ["活动", "限时", "双倍经验"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 32,
+      "category": "notice",
+      "subCategory": "活动通知",
+      "text": "【签到福利】连续签到7天送传说皮肤",
+      "tags": ["签到", "福利", "皮肤"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 33,
+      "category": "notice",
+      "subCategory": "活动通知",
+      "text": "【新英雄上线】新英雄「影刃」登场，限时折扣",
+      "tags": ["新英雄", "影刃", "折扣"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 34,
+      "category": "notice",
+      "subCategory": "活动通知",
+      "text": "【充值返利】单笔充值满648返利50%",
+      "tags": ["充值", "返利", "648"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 35,
+      "category": "notice",
+      "subCategory": "活动通知",
+      "text": "【邀请有礼】邀请好友回归领限定头像框",
+      "tags": ["邀请", "回归", "头像框"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 36,
+      "category": "notice",
+      "subCategory": "安全提醒",
+      "text": "【防骗提醒】请勿相信私下交易，谨防诈骗",
+      "tags": ["防骗", "交易", "诈骗"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 37,
+      "category": "notice",
+      "subCategory": "安全提醒",
+      "text": "【密码安全】建议定期修改密码，开启二级密码",
+      "tags": ["密码", "安全", "二级密码"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 38,
+      "category": "notice",
+      "subCategory": "安全提醒",
+      "text": "【账号保护】检测到异常登录，已开启保护模式",
+      "tags": ["账号", "保护", "异常登录"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 39,
+      "category": "notice",
+      "subCategory": "安全提醒",
+      "text": "【交易警告】禁止RMT交易，违者封号处理",
+      "tags": ["RMT", "交易", "警告", "封号"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 40,
+      "category": "notice",
+      "subCategory": "安全提醒",
+      "text": "【钓鱼网站】请认准官网地址，谨防钓鱼网站",
+      "tags": ["钓鱼", "官网", "诈骗"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 41,
+      "category": "notice",
+      "subCategory": "系统维护",
+      "text": "【例行维护】每周四02:00-04:00例行维护",
+      "tags": ["例行", "维护", "每周"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 42,
+      "category": "notice",
+      "subCategory": "系统维护",
+      "text": "【网络优化】预计10分钟后网络波动恢复",
+      "tags": ["网络", "波动", "优化"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 43,
+      "category": "notice",
+      "subCategory": "系统维护",
+      "text": "【BUG修复】已修复部分机型闪退问题",
+      "tags": ["BUG", "修复", "闪退"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 44,
+      "category": "notice",
+      "subCategory": "系统维护",
+      "text": "【性能优化】本次更新优化了帧率表现",
+      "tags": ["性能", "优化", "帧率"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 45,
+      "category": "notice",
+      "subCategory": "系统维护",
+      "text": "【热更通知】正在不停机热更，无需重启游戏",
+      "tags": ["热更", "不停机", "更新"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-03-05T00:00:00Z"
+    },
+    {
+      "id": 46,
+      "category": "reward",
+      "subCategory": "停服补偿",
+      "text": "【停服补偿】发放钻石*200 + 体力*100，请查收邮件",
+      "tags": ["停服", "补偿", "钻石", "体力"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 47,
+      "category": "reward",
+      "subCategory": "停服补偿",
+      "text": "【维护补偿】全服发放招募券*10 + 金币*50000",
+      "tags": ["维护", "补偿", "招募券", "金币"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 48,
+      "category": "reward",
+      "subCategory": "停服补偿",
+      "text": "【延迟补偿】额外补偿传说皮肤碎片*20",
+      "tags": ["延迟", "补偿", "皮肤碎片"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 49,
+      "category": "reward",
+      "subCategory": "停服补偿",
+      "text": "【紧急补偿】因服务器波动补偿绑定元宝*300",
+      "tags": ["紧急", "补偿", "元宝"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 50,
+      "category": "reward",
+      "subCategory": "停服补偿",
+      "text": "【体验服补偿】参与测试玩家获得限定称号",
+      "tags": ["体验服", "补偿", "称号"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 51,
+      "category": "reward",
+      "subCategory": "BUG补偿",
+      "text": "【BUG补偿】修复充值未到账问题，补偿点券*500",
+      "tags": ["BUG", "补偿", "充值", "点券"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 52,
+      "category": "reward",
+      "subCategory": "BUG补偿",
+      "text": "【异常补偿】因活动积分异常，补偿活动币*100",
+      "tags": ["异常", "补偿", "活动币"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 53,
+      "category": "reward",
+      "subCategory": "BUG补偿",
+      "text": "【回档补偿】数据异常已修复，补偿高级召唤券*5",
+      "tags": ["回档", "补偿", "召唤券"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 54,
+      "category": "reward",
+      "subCategory": "BUG补偿",
+      "text": "【显示补偿】排行榜显示异常，补偿声望*1000",
+      "tags": ["显示", "异常", "补偿", "声望"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 55,
+      "category": "reward",
+      "subCategory": "BUG补偿",
+      "text": "【连接补偿】频繁掉线问题已修复，补偿加速卡*3",
+      "tags": ["掉线", "补偿", "加速卡"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 56,
+      "category": "reward",
+      "subCategory": "活动补偿",
+      "text": "【活动调整】签到活动奖励翻倍，补发差额奖励",
+      "tags": ["活动", "调整", "补偿", "签到"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 57,
+      "category": "reward",
+      "subCategory": "活动补偿",
+      "text": "【延长通知】限时活动延长3天，额外增加奖励档位",
+      "tags": ["活动", "延长", "补偿"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 58,
+      "category": "reward",
+      "subCategory": "活动补偿",
+      "text": "【难度下调】副本难度已下调，补偿体力药水*5",
+      "tags": ["副本", "难度", "补偿", "体力"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 59,
+      "category": "reward",
+      "subCategory": "活动补偿",
+      "text": "【概率调整】抽卡概率已公示，补偿自选宝箱*1",
+      "tags": ["抽卡", "概率", "补偿", "宝箱"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 60,
+      "category": "reward",
+      "subCategory": "活动补偿",
+      "text": "【任务优化】日常任务减负，补偿活跃度礼包",
+      "tags": ["任务", "优化", "补偿", "活跃度"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-04-12T00:00:00Z"
+    },
+    {
+      "id": 61,
+      "category": "maintenance",
+      "subCategory": "例行维护",
+      "text": "【例行维护】每周三03:00-05:00进行例行维护",
+      "tags": ["例行", "维护", "每周三"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 62,
+      "category": "maintenance",
+      "subCategory": "例行维护",
+      "text": "【周二维护】全服维护，更新内容详见公告",
+      "tags": ["周二", "维护", "全服"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 63,
+      "category": "maintenance",
+      "subCategory": "例行维护",
+      "text": "【周四维护】停机维护，请提前下线避免损失",
+      "tags": ["周四", "停机", "维护"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 64,
+      "category": "maintenance",
+      "subCategory": "例行维护",
+      "text": "【周一维护】例行维护，预计维护2小时",
+      "tags": ["周一", "例行", "维护"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 65,
+      "category": "maintenance",
+      "subCategory": "例行维护",
+      "text": "【周末维护】凌晨维护，不影响白天游戏",
+      "tags": ["周末", "凌晨", "维护"],
+      "priority": 6,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 66,
+      "category": "maintenance",
+      "subCategory": "紧急维护",
+      "text": "【紧急维护】服务器异常，紧急维护30分钟",
+      "tags": ["紧急", "维护", "服务器异常"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 67,
+      "category": "maintenance",
+      "subCategory": "紧急维护",
+      "text": "【热修复】不停机热修，重登即可生效",
+      "tags": ["热修复", "不停机", "重登"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 68,
+      "category": "maintenance",
+      "subCategory": "紧急维护",
+      "text": "【闪断更新】闪断更新5分钟，请重新登录",
+      "tags": ["闪断", "更新", "重登"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 69,
+      "category": "maintenance",
+      "subCategory": "紧急维护",
+      "text": "【紧急修复】修复商城无法购买问题",
+      "tags": ["紧急", "修复", "商城"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 70,
+      "category": "maintenance",
+      "subCategory": "紧急维护",
+      "text": "【数据修复】排行榜数据重新计算中",
+      "tags": ["数据", "修复", "排行榜"],
+      "priority": 7,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 71,
+      "category": "maintenance",
+      "subCategory": "版本更新",
+      "text": "【版本更新】v4.0.0版本更新，新增跨服战场",
+      "tags": ["版本", "更新", "v4.0.0", "跨服"],
+      "priority": 10,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 72,
+      "category": "maintenance",
+      "subCategory": "版本更新",
+      "text": "【新赛季】S15赛季开启，段位重置说明",
+      "tags": ["赛季", "S15", "段位", "重置"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 73,
+      "category": "maintenance",
+      "subCategory": "版本更新",
+      "text": "【新玩法】公会战即将开启，更新内容前瞻",
+      "tags": ["公会战", "新玩法", "前瞻"],
+      "priority": 9,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 74,
+      "category": "maintenance",
+      "subCategory": "版本更新",
+      "text": "【平衡调整】英雄平衡性调整，详情见公告",
+      "tags": ["平衡", "调整", "英雄"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    },
+    {
+      "id": 75,
+      "category": "maintenance",
+      "subCategory": "版本更新",
+      "text": "【新皮肤】夏日限定皮肤上线，更新后获取",
+      "tags": ["皮肤", "夏日", "限定"],
+      "priority": 8,
+      "enabled": true,
+      "createdAt": "2024-05-20T00:00:00Z"
+    }
+  ]
+}
