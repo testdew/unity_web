@@ -1,6 +1,6 @@
 /**
  * 主逻辑模块 - 优化版
- * 包含内容面板、设置弹窗、翻译设置、风格设置等
+ * 去掉推荐列表中的原文显示，关闭推荐内容自动翻译
  */
 
 // 等待 DOM 加载完成
@@ -37,16 +37,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSubType = '';
     let currentMainType = 'ban';
     
-    // 翻译相关变量
-    let translateEnabled = false;
+    // 翻译相关变量（仅用于输入框翻译，不自动翻译推荐内容）
+    let translateEnabled = false;  // 默认关闭自动翻译
     let translatorEngine = 'google';
     let targetLang = 'en';
-    let autoTranslate = false;
+    let autoTranslate = false;      // 推荐内容自动翻译开关（默认关闭）
     
     // 翻译器实例
     let translatorInstance = null;
     
-    // 缓存翻译结果
+    // 缓存翻译结果（仅用于输入框翻译）
     const translationCache = new Map();
     
     // 分类名称映射
@@ -62,15 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 获取翻译器实例
      */
     function getTranslator() {
-        // 优先使用全局 translatorManager
         if (window.translatorManager && window.translatorManager.currentTranslator) {
             return window.translatorManager.currentTranslator;
         }
-        // 使用本地实例
         if (translatorInstance) {
             return translatorInstance;
         }
-        // 返回 null，降级处理
         return null;
     }
     
@@ -152,7 +149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (translatorEngine === 'microsoft' && typeof MicrosoftTranslator !== 'undefined') {
             translatorInstance = new MicrosoftTranslator(config);
         } else {
-            // 降级：创建一个简单的翻译器
             translatorInstance = {
                 translate: async (text, lang) => {
                     console.warn('使用降级翻译器，返回原文');
@@ -161,7 +157,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         }
         
-        // 也尝试使用全局管理器
         if (window.translatorManager) {
             window.translatorManager.init({
                 engine: translatorEngine,
@@ -170,16 +165,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
         
-        translateEnabled = autoTranslate;
+        // 翻译功能仅在输入框手动翻译时启用，不自动翻译推荐内容
+        translateEnabled = false;  // 强制关闭自动翻译
         
         console.log('翻译器已初始化:', translatorEngine, targetLang);
+        console.log('推荐内容自动翻译已关闭');
     }
     
     /**
-     * 翻译文本（带缓存）
+     * 翻译文本（仅用于输入框手动翻译）
      */
-    async function translateWithCache(text) {
-        if (!translateEnabled || !text || text.trim() === '') return text;
+    async function translateText(text) {
+        if (!text || text.trim() === '') return text;
         
         const cacheKey = `${text}_${targetLang}_${translatorEngine}`;
         if (translationCache.has(cacheKey)) {
@@ -194,14 +191,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 translated = await translator.translate(text, targetLang);
             } else if (window.translatorManager && window.translatorManager.translate) {
                 translated = await window.translatorManager.translate(text);
-            } else {
-                console.warn('没有可用的翻译器，返回原文');
-                return text;
             }
             
             translationCache.set(cacheKey, translated);
             
-            // 限制缓存大小
             if (translationCache.size > 200) {
                 const firstKey = translationCache.keys().next().value;
                 translationCache.delete(firstKey);
@@ -215,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     /**
-     * 翻译输入框内容
+     * 翻译输入框内容（手动点击翻译按钮时触发）
      */
     async function translateInputContent() {
         const originalText = contentInput.value;
@@ -229,12 +222,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         translateInputBtn.disabled = true;
         
         try {
-            // 临时启用翻译
-            const wasEnabled = translateEnabled;
-            translateEnabled = true;
-            const translated = await translateWithCache(originalText);
+            const translated = await translateText(originalText);
             contentInput.value = translated;
-            translateEnabled = wasEnabled;
         } catch (error) {
             console.error('翻译失败:', error);
             contentInput.placeholder = '翻译失败，请检查网络或设置';
@@ -245,7 +234,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     /**
-     * 渲染推荐列表
+     * 渲染推荐列表（不翻译，直接显示原文）
      */
     async function renderRecommendations() {
         const keyword = searchInput.value.trim();
@@ -260,31 +249,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const typeName = categoryNames[currentMainType] || '';
         
-        if (autoTranslate && translateEnabled) {
-            optionList.innerHTML = '<li class="empty-tip">🔄 加载翻译中...</li>';
-        }
-        
-        let translatedTexts = items.map(item => item.text);
-        if (autoTranslate && translateEnabled) {
-            translatedTexts = await Promise.all(items.map(item => translateWithCache(item.text)));
-        }
-        
-        optionList.innerHTML = items.map((item, index) => `
+        // 直接显示原文，不进行任何翻译
+        optionList.innerHTML = items.map((item) => `
             <li data-id="${item.id}" data-text="${escapeHtml(item.text)}">
                 <div style="flex:1">
-                    <div style="margin-bottom: 4px;">${escapeHtml(autoTranslate && translateEnabled ? translatedTexts[index] : item.text)}</div>
-                    ${(autoTranslate && translateEnabled) ? `<div style="font-size: 11px; opacity: 0.6;">原文: ${escapeHtml(item.text)}</div>` : ''}
+                    <div>${escapeHtml(item.text)}</div>
                 </div>
                 <span class="badge">${typeName}</span>
             </li>
         `).join('');
         
+        // 绑定点击事件：将选中内容填入输入框
         document.querySelectorAll('.option-list li[data-text]').forEach(li => {
             li.addEventListener('click', () => {
                 const originalText = li.getAttribute('data-text');
-                const displayDiv = li.querySelector('div:first-child div:first-child');
-                const displayText = displayDiv ? displayDiv.textContent.trim() : originalText;
-                contentInput.value = displayText;
+                contentInput.value = originalText;
+                // 高亮输入框
                 contentInput.style.backgroundColor = 'rgba(102, 126, 234, 0.2)';
                 setTimeout(() => {
                     contentInput.style.backgroundColor = '';
@@ -358,7 +338,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             config.region = msRegion?.value || 'global';
         }
         
-        // 重新创建翻译器实例
         if (translatorEngine === 'google' && typeof GoogleTranslator !== 'undefined') {
             translatorInstance = new GoogleTranslator();
         } else if (translatorEngine === 'baidu' && typeof BaiduTranslator !== 'undefined') {
@@ -375,7 +354,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
         
-        translateEnabled = autoTranslate;
         translationCache.clear();
         
         // 重新渲染推荐列表
@@ -520,7 +498,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveSettingsModalBtn.addEventListener('click', saveAllSettings);
         }
         
-        // 点击弹窗外部关闭
         if (settingsModal) {
             settingsModal.addEventListener('click', (e) => {
                 if (e.target === settingsModal) {
@@ -529,7 +506,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
         
-        // 标签页切换
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabId = btn.getAttribute('data-tab');
@@ -537,7 +513,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
         
-        // 引擎切换时显示对应设置
         if (translatorSelect) {
             translatorSelect.addEventListener('change', (e) => {
                 toggleEngineSettings(e.target.value);
@@ -565,17 +540,13 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function init() {
         showLoadingState();
-        const url = new URL(window.location.href);
-console.log('完整URL:', url.href);
-console.log('baidu_app_id:', url.searchParams.get('baidu_app_id'));
-console.log('baidu_secret:', url.searchParams.get('baidu_secret'));
+        
         initTheme();
         initMessageListener();
         loadSettingsFromLocal();
         initTranslator();
         bindEvents();
         
-        // 检查 DataLoader 是否存在
         if (typeof DataLoader === 'undefined') {
             showErrorState('DataLoader 未加载，请检查文件引用');
             return;
